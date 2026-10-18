@@ -32,25 +32,26 @@ html,body{height:100%;margin:0;background:var(--panel)}
 body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
 input{-webkit-user-select:text;user-select:text}
 button,input{font:inherit;color:inherit}
-.app{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+.app{position:fixed;top:0;left:0;right:0;height:var(--appH,100%);overflow:hidden;background:var(--bg)}
 main{position:absolute;inset:0}
 canvas.puddle{position:absolute;inset:0;width:100%;height:100%;display:block}
 .fallback-bg{background:radial-gradient(ellipse at 50% 46%,#ff3d8b 0%,#ff7a1a 18%,#ffd23f 28%,#1b1b22 48%,#0f0f13 75%)}
 
 /* glass bars */
 header{position:absolute;top:0;right:0;left:var(--side);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:calc(env(safe-area-inset-top,0px) + 14px) var(--gr) 14px var(--gl);
-  background:linear-gradient(to bottom,rgb(11 11 14 / .95),rgb(11 11 14 / .72));-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border-bottom:1px solid rgb(255 255 255 / .07)}
+  padding:max(8px,calc(env(safe-area-inset-top,0px) - 2px)) var(--gr) 10px var(--gl);transition:background .4s var(--ease)}
+header.solid{background:linear-gradient(to bottom,rgb(11 11 14) 0%,rgb(11 11 14 / .94) 72%,rgb(11 11 14 / 0) 100%)}
 .logo{font-family:var(--f-display);font-size:30px;letter-spacing:.03em;line-height:1;background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgb(255 122 26 / .35))}
 .hacts{display:flex;gap:10px;align-items:center}
 .hbtn{width:46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;background:var(--raise);color:var(--ink);border:1px solid var(--line)}
 .hbtn.main{background:var(--neon);color:#17110a;border:0;box-shadow:0 6px 22px -6px rgb(255 122 26 / .8)}
 .hbtn svg{width:24px;height:24px}
-.bottom{position:absolute;left:var(--side);right:0;bottom:var(--navh);z-index:5;background:rgb(11 11 14 / .9);-webkit-backdrop-filter:blur(26px) saturate(1.4);backdrop-filter:blur(26px) saturate(1.4);border-top:1px solid rgb(255 255 255 / .08)}
-nav{position:absolute;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(4,1fr);background:rgb(11 11 14 / .96);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-top:1px solid rgb(255 255 255 / .06);
-  padding:0 env(safe-area-inset-right,0px) calc(env(safe-area-inset-bottom,0px) + 6px) env(safe-area-inset-left,0px)}
+.dockwrap{position:absolute;left:0;right:0;bottom:0;z-index:6;display:flex;flex-direction:column}
+.bottom{position:relative;background:rgb(11 11 14 / .9);-webkit-backdrop-filter:blur(26px) saturate(1.4);backdrop-filter:blur(26px) saturate(1.4);border-top:1px solid rgb(255 255 255 / .08)}
+nav{position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:rgb(11 11 14 / .96);-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);border-top:1px solid rgb(255 255 255 / .06);
+  padding:0 env(safe-area-inset-right,0px) max(6px,calc(env(safe-area-inset-bottom,0px) - 14px)) env(safe-area-inset-left,0px)}
 nav .brand{display:none}
-nav button{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px 8px;cursor:pointer;font-size:13px;font-weight:800;position:relative}
+nav button{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px 4px;cursor:pointer;font-size:13px;font-weight:800;position:relative}
 nav button svg{width:26px;height:26px;transition:transform .45s var(--ease),filter .45s var(--ease)}
 nav button[aria-current="page"]{color:var(--ink)}
 nav button[aria-current="page"] svg{color:var(--yellow);transform:translateY(-3px);filter:drop-shadow(0 4px 10px rgb(255 122 26 / .7))}
@@ -60,7 +61,19 @@ nav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:
 .view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:1;
   padding:calc(var(--hh) + 16px) var(--gr) calc(var(--bh) + 24px) calc(var(--side) + var(--gl))}
 .view:not(.home){background:rgb(15 15 19 / .93)}
-.view.home{display:grid;place-items:center;overflow:hidden}
+.view.home{display:flex;flex-direction:column;align-items:center;overflow:hidden;padding-bottom:calc(var(--bh) + 14px)}
+.stage{flex:1;min-height:0;width:100%;display:grid;place-items:center}
+.oracle{width:100%;max-width:520px;display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:24px;background:rgb(12 12 16 / .58);border:1px solid rgb(255 255 255 / .1);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 20px 50px -20px rgb(0 0 0 / .8)}
+.olbl{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.olbl i{font-style:normal;font-size:16px;color:var(--yellow);filter:drop-shadow(0 0 8px rgb(255 210 63 / .8))}
+.olbl span{background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent}
+.oracle p{margin:0;font-size:17px;line-height:1.42;font-weight:700;color:var(--ink);text-shadow:0 1px 2px rgb(0 0 0 / .5)}
+.otrack{display:flex;align-items:center;gap:10px;background:rgb(255 255 255 / .07);border:1px solid rgb(255 255 255 / .1);border-radius:999px;padding:6px 6px 6px 14px;cursor:pointer;color:var(--ink);text-align:left;min-height:44px}
+.otrack small{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex:none}
+.otrack b{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.otrack span{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--neon);color:#17110a;flex:none}
+.otrack span svg{width:15px;height:15px}
 .inner{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .center{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 h2{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0;line-height:1.15;letter-spacing:.01em}
@@ -68,10 +81,10 @@ h2{font-family:var(--f-display);font-weight:400;font-size:24px;margin:0;line-hei
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 .count{display:inline-flex;align-items:center;height:44px;padding:0 4px;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:800}
 
-.bigplay{position:relative;width:96px;height:96px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;color:#17110a;
-  background:radial-gradient(circle at 32% 26%,#fff,#fff3e2 50%,#ffd9b0);box-shadow:0 0 0 1px rgb(255 255 255 / .35),0 0 40px -6px rgb(255 122 26 / .55),inset 0 -5px 12px rgb(0 0 0 / .14);
-  transform:scale(calc(1 + var(--e) * .1));transition:transform .2s linear}
-.bigplay svg{width:32px;height:32px}
+.bigplay{position:relative;width:92px;height:92px;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:#fff;
+  background:rgb(255 255 255 / .13);border:1px solid rgb(255 255 255 / .4);-webkit-backdrop-filter:blur(12px) saturate(1.6);backdrop-filter:blur(12px) saturate(1.6);
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .4),inset 0 -8px 20px rgb(255 255 255 / .06),0 10px 40px -12px rgb(0 0 0 / .7);transform:scale(calc(1 + var(--e) * .08));transition:transform .12s linear}
+.bigplay svg{width:34px;height:34px;filter:drop-shadow(0 2px 6px rgb(0 0 0 / .45))}
 .bigplay::before,.bigplay::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:2px solid rgb(255 180 90 / .7);opacity:0;pointer-events:none}
 .wavetitle{font-family:var(--f-display);font-size:clamp(34px,9vw,52px);margin:6px 0 0;line-height:1;text-shadow:0 2px 0 rgb(0 0 0 / .35),0 0 30px rgb(255 61 139 / .45)}
 .wavesub{margin:0;font-size:17px;font-weight:800;text-shadow:0 1px 3px rgb(0 0 0 / .7)}
@@ -209,7 +222,9 @@ button:focus-visible,.row:focus-visible{outline:2px solid var(--yellow);outline-
 /* desktop: sidebar */
 @media (min-width:960px){
   :root{--side:250px; --navh:0px}
-  nav{top:0;bottom:0;right:auto;width:var(--side);display:flex;flex-direction:column;gap:4px;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px 18px;border-top:0;border-right:1px solid rgb(255 255 255 / .07)}
+  .dockwrap{display:contents}
+  .bottom{position:absolute;left:var(--side);right:0;bottom:0;z-index:5}
+  nav{position:absolute;left:0;top:0;bottom:0;z-index:6;width:var(--side);display:flex;flex-direction:column;gap:4px;padding:calc(env(safe-area-inset-top,0px) + 18px) 14px 18px;border-top:0;border-right:1px solid rgb(255 255 255 / .07)}
   nav .brand{display:block;font-family:var(--f-display);font-size:34px;padding:6px 12px 22px;background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent}
   nav button{flex-direction:row;gap:14px;padding:13px 14px;border-radius:14px;font-size:16px;justify-content:flex-start}
   nav button:hover{background:var(--raise)}
@@ -221,7 +236,7 @@ button:focus-visible,.row:focus-visible{outline:2px solid var(--yellow);outline-
   .row{padding:8px 12px}
 }
 @media (prefers-reduced-motion:no-preference){
-  .wavetitle,.wavesub,.stats{animation:rise 1s var(--ease) both}.wavesub{animation-delay:.15s}.stats{animation-delay:.3s}
+  .oracle{animation:rise 1s .2s var(--ease) both}
   .bigplay{animation:pop .9s var(--ease) both}
   @keyframes rise{from{opacity:0;transform:translateY(16px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
   @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1}}
@@ -255,12 +270,12 @@ button:focus-visible,.row:focus-visible{outline:2px solid var(--yellow);outline-
     <canvas class="puddle" id="bgCv" aria-hidden="true"></canvas>
 
     <section class="view home" id="v-home">
-      <div class="center">
-        <button class="bigplay" id="wavePlay" aria-label="Включить всё вперемешку"></button>
-        <p class="wavetitle">Моя волна</p>
-        <p class="wavesub" id="waveSub">Добавь музыку кнопкой +</p>
-        <div class="stats" id="stats"></div>
-      </div>
+      <div class="stage" id="stage"><button class="bigplay" id="wavePlay" aria-label="Моя волна: включить всё вперемешку"></button></div>
+      <article class="oracle" id="oracle" aria-live="polite">
+        <div class="olbl"><i id="oIco">☀</i><span id="oLbl">Утро · предсказание</span></div>
+        <p id="oText"></p>
+        <button class="otrack" id="oTrack" hidden><small>Трек дня</small><b></b><span></span></button>
+      </article>
     </section>
 
     <section class="view" id="v-lib" hidden><div class="inner">
@@ -303,6 +318,7 @@ button:focus-visible,.row:focus-visible{outline:2px solid var(--yellow);outline-
     </div>
   </header>
 
+  <div class="dockwrap" id="dockwrap">
   <div class="bottom" id="bottom">
     <div class="selbar" id="selBar" hidden>
       <span id="selText">Выбрано: 0</span>
@@ -338,6 +354,7 @@ button:focus-visible,.row:focus-visible{outline:2px solid var(--yellow);outline-
     <button data-v="folders"><span data-i="folder"></span>Папки</button>
     <button data-v="fav"><span data-i="heart"></span>Избранное</button>
   </nav>
+  </div>
 
   <section class="np" id="np" aria-label="Сейчас играет">
     <div class="np-top"><button class="ib" id="npClose" aria-label="Свернуть"></button><span class="lbl" id="npFrom">Сейчас играет</span><button class="ib" id="npMore" aria-label="Ещё"></button></div>
@@ -417,11 +434,20 @@ function askName(title, value, placeholder, done){
   s.querySelector("#fnF").onsubmit = e => { e.preventDefault(); const v = inp.value.trim(); if(!v){ inp.focus(); return; } s.remove(); done(v); };
 }
 const desktop = () => matchMedia("(min-width:960px)").matches;
-function measure(){
-  const r = document.documentElement.style, nh = desktop() ? 0 : $("dock").offsetHeight;
-  r.setProperty("--hh", $("top").offsetHeight + "px"); r.setProperty("--navh", nh + "px"); r.setProperty("--bh", ($("bottom").offsetHeight + nh) + "px");
+function fitH(){
+  // iOS home-screen apps sometimes report a viewport shorter than the screen and leave a gap under the dock
+  let h = innerHeight;
+  if(navigator.standalone){ const portrait = innerHeight >= innerWidth, sh = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height); if(sh > h && sh - h < 160) h = sh; }
+  document.documentElement.style.setProperty("--appH", h + "px");
 }
-new ResizeObserver(measure).observe($("top")); new ResizeObserver(measure).observe($("bottom")); new ResizeObserver(measure).observe($("dock"));
+fitH(); addEventListener("resize", fitH); addEventListener("orientationchange", () => setTimeout(fitH, 300));
+function measure(){
+  const r = document.documentElement.style;
+  r.setProperty("--hh", $("top").offsetHeight + "px");
+  r.setProperty("--bh", (desktop() ? $("bottom").offsetHeight : $("dockwrap").offsetHeight) + "px");
+  placeStage();
+}
+new ResizeObserver(measure).observe($("top")); new ResizeObserver(measure).observe($("dockwrap")); new ResizeObserver(measure).observe($("bottom")); new ResizeObserver(measure).observe($("stage"));
 
 // ---------- storage ----------
 let tracks = store.get("svoi4-tracks", []);       // [{id,title,artist,album,dur,size,added,art,plays,demo}]
@@ -626,7 +652,7 @@ const LIST_OF = { lib:"libList", folders:"folderList", fav:"favList" };
 function go(v){
   if(selecting && v !== view) setSelecting(false);
   if(v !== "folders") openFolder = null;
-  view = v;
+  view = v; $("top").classList.toggle("solid", v !== "home");
   document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-" + v);
   document.querySelectorAll("#dock button").forEach(b => b.dataset.v === v ? b.setAttribute("aria-current","page") : b.removeAttribute("aria-current"));
   if(v !== lastView){ const el = $("v-" + v); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); lastView = v; }
@@ -643,8 +669,7 @@ function libList(){
 }
 function renderAll(){
   const n = tracks.length, total = tracks.reduce((s, t) => s + (t.dur || 0), 0);
-  $("waveSub").textContent = demoPending ? "Готовлю демо-треки…" : n ? "Нажми, чтобы включить всё вперемешку" : "Добавь музыку кнопкой +";
-  $("stats").innerHTML = n ? `<span class="stat">${tw(n)}</span><span class="stat">${Math.round(total/60)} мин</span><span class="stat">${favs.filter(byId).length} ♡</span>` : "";
+  renderOracle();
   const ghosts = booting ? ghostRows(5) : demoPending ? ghostRows(demoPending) : "";
   if(view === "lib"){
     document.querySelectorAll("#sortChips .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.sort === settings.sort));
@@ -669,6 +694,84 @@ function renderAll(){
 document.addEventListener("click", e => { if(e.target.closest("[data-add]")) $("fileIn").click(); });
 $("q").addEventListener("input", renderAll);
 $("sortChips").addEventListener("click", e => { const c = e.target.closest("[data-sort]"); if(!c) return; settings.sort = c.dataset.sort; saveAll(); renderAll(); });
+
+
+// ---------- утро: предсказание на день · вечер: похвала, инсайт, мотивация ----------
+const ORACLE_AM = [
+ "Сегодня тебе скажут «да» там, где вчера было «посмотрим». Спроси первой.",
+ "День начнётся медленно, а к вечеру разгонится. Береги силы — главное случится после обеда.",
+ "Сегодня кто-то напишет тебе первым. Ответь честно, без игр.",
+ "Деньги сегодня любят решительных. Назови свою цену и не извиняйся.",
+ "Хороший день, чтобы закрыть одно старое дело. Только одно — и станет легче дышать.",
+ "Тебя сегодня заметят. Надень то, в чём чувствуешь себя главной.",
+ "Случайная фраза подкинет тебе идею. Держи заметки под рукой.",
+ "Не всё пойдёт по плану — и это к лучшему. Импровизация сегодня твоя суперсила.",
+ "Сегодня день маленьких побед. Считай их — к вечеру наберётся на большую.",
+ "Кто-то проверит твои границы. Спокойное «нет» сработает лучше крика.",
+ "Удача прячется в мелочах: письма, звонки, переписка. Не откладывай ответы.",
+ "Твоя энергия сегодня заразительна. Позови кого-нибудь с собой — вдвоём выйдет ярче.",
+ "Сегодня не нужно никому ничего доказывать. Просто сделай — это скажет за тебя.",
+ "День для смелого шага, который ты откладываешь. Пять минут храбрости — и он сделан.",
+ "Сегодня повезёт с людьми. Новое знакомство окажется полезнее, чем кажется.",
+ "Не сравнивай себя ни с кем. Твой темп — правильный.",
+ "Сегодня отлично получаются тексты и разговоры. Говори прямо — тебя услышат.",
+ "Задай тон дню сама: включи трек дня и выйди из дома главной героиней.",
+ "Сегодня тебе что-то вернут — деньгами, вниманием или добрым словом.",
+ "День для порядка: одна полка, одна папка, один вопрос. Голова станет лёгкой.",
+ "Интуиция сегодня громче логики. Если внутри «нет» — не спорь с ним.",
+ "Сегодня можно позволить себе больше, чем обычно. Ты это заслужила.",
+ "Прилетит хорошая новость, откуда не ждёшь. Держи телефон рядом.",
+ "День любит дерзких. Спроси о том, о чём обычно молчишь.",
+ "Не бери сегодня чужие задачи. Твоё время — твоя валюта.",
+ "Отличный день, чтобы начать — неважно что. Главное, начать до обеда.",
+ "Кто-то сегодня вдохновится тобой. Даже если ты об этом не узнаешь.",
+ "Сегодня всё получится с третьей попытки. Не сдавайся на второй."
+];
+const ORACLE_PM = [
+ "Ты сегодня выдержала больше, чем кажется. Это и есть сила.",
+ "Инсайт дня: усталость — не слабость, а знак, что ты двигалась. Отдыхай без чувства вины.",
+ "Ты молодец уже потому, что не бросила. Завтра будет проще.",
+ "День не обязан был быть идеальным. Он был твоим — и этого достаточно.",
+ "Инсайт: люди запоминают не идеальность, а смелость. Ты сегодня была смелой.",
+ "Похвали себя вслух за одну вещь, которую сделала сегодня. Серьёзно, вслух.",
+ "Всё, что не успела, подождёт до завтра. Мир не рухнет — проверено.",
+ "Инсайт дня: «нет» другим часто значит «да» себе.",
+ "Ты растёшь даже в дни, когда кажется, что стоишь на месте. Корни — тоже рост.",
+ "Сегодня ты стала на шаг ближе к цели. Пусть маленький — он засчитан.",
+ "Мотивация на завтра: делай не идеально, делай регулярно.",
+ "Инсайт: твоя энергия — самый ценный ресурс. Трать её на тех, кто отвечает тем же.",
+ "Ты умеешь больше, чем показываешь. Завтра покажи чуть больше.",
+ "Сегодня было что-то хорошее — найди это и запомни. Мозг учится на радости.",
+ "Инсайт дня: сравнивай себя только с собой вчерашней. И ты уже впереди.",
+ "Ты не обязана быть удобной. Ты обязана быть собой.",
+ "Хороший вечер, чтобы выключить уведомления и включить свою музыку.",
+ "Инсайт: деньги приходят к тем, кто ценит своё время. Ты сегодня ценила.",
+ "Ты справилась. Даже если было трудно, даже если не всё. Справилась.",
+ "Завтра — новая попытка. Сегодняшние ошибки уже опыт, а не груз.",
+ "Инсайт дня: лучшие идеи приходят, когда отдыхаешь. Дай себе тишину.",
+ "Ты — главная героиня своей истории. Сегодняшняя серия была сильной.",
+ "Твоя дерзость сегодня кому-то помогла. Не теряй её.",
+ "Инсайт: границы — не стены, а двери. Ключ только у тебя.",
+ "Отпусти то, что не получилось. Оставь себе то, чему научилась.",
+ "Ты на правильном пути. Просто сейчас он идёт в гору.",
+ "Инсайт дня: маленький шаг каждый день сильнее рывка раз в месяц.",
+ "Гордись собой сегодня. Без «но»."
+];
+function renderOracle(){
+  const d = new Date(), hr = d.getHours(), am = hr >= 5 && hr < 17, base = new Date(d);
+  if(hr < 5) base.setDate(base.getDate() - 1);
+  const dn = Math.floor(new Date(base.getFullYear(), base.getMonth(), base.getDate()).getTime() / 864e5);
+  const list = am ? ORACLE_AM : ORACLE_PM, txt = list[am ? dn % list.length : (dn * 5 + 3) % list.length];
+  $("oIco").textContent = am ? "☀" : "☾";
+  $("oLbl").textContent = am ? `Утро · предсказание на ${base.toLocaleDateString("ru-RU", { day:"numeric", month:"long" })}` : "Вечер · похвала и инсайт дня";
+  if($("oText").textContent !== txt) $("oText").textContent = txt;
+  const tb = $("oTrack");
+  if(tracks.length){ const t = tracks[(dn * 13 + (am ? 7 : 3)) % tracks.length]; tb.hidden = false; tb.dataset.id = t.id; tb.querySelector("b").textContent = t.title + (t.artist ? " — " + t.artist : ""); }
+  else tb.hidden = true;
+}
+setInterval(renderOracle, 60000);
+$("oTrack").querySelector("span").innerHTML = I.play;
+$("oTrack").onclick = () => { const id = $("oTrack").dataset.id; if(byId(id)) playList(tracks.map(t => t.id), id, "Трек дня"); };
 
 // ---------- folders ----------
 const FOLDER_COLORS = ["#ff7a1a","#ff3d8b","#ffd23f","#f06bff","#3fe0d0","#ff9f43"];
@@ -825,6 +928,7 @@ async function load(autoplay, at = 0){
   const b = await getBlob("audio", cur.id);
   if(!b || b === true){ toast("Файл трека не найден в памяти"); return; }
   if(srcUrl) URL.revokeObjectURL(srcUrl);
+  analyze(cur.id, b);
   srcUrl = URL.createObjectURL(b); audio.src = srcUrl; audio.playbackRate = settings.rate || 1; countedPlay = false;
   if(at) audio.addEventListener("loadedmetadata", () => { try{ audio.currentTime = at; }catch{} }, {once:true});
   if(autoplay) audio.play().catch(() => {});
@@ -839,7 +943,7 @@ function next(auto){
   if(qi + 1 >= queue.length){ if(settings.repeat === "all" || !auto) qi = 0; else { audio.pause(); audio.currentTime = 0; return; } } else qi++;
   load(true);
 }
-function prev(){ if(!queue.length) return; if(audio.currentTime > 3){ audio.currentTime = 0; return; } qi = (qi - 1 + queue.length) % queue.length; load(true); }
+function prev(hard){ if(!queue.length) return; if(!hard && audio.currentTime > 3){ audio.currentTime = 0; return; } qi = (qi - 1 + queue.length) % queue.length; load(true); }
 const skip = s => { if(!cur) return; audio.currentTime = Math.max(0, Math.min((audio.duration || 0) - .2, audio.currentTime + s)); };
 function toggle(){ if(!cur){ if(tracks.length) playList(tracks.map(t => t.id), null, "Вся музыка"); else $("fileIn").click(); return; } audio.paused ? audio.play() : audio.pause(); }
 audio.addEventListener("ended", () => next(true));
@@ -849,7 +953,7 @@ $("mPP").onclick = e => { e.stopPropagation(); toggle(); };
 $("mNext").onclick = e => { e.stopPropagation(); next(false); };
 $("mFav").onclick = e => { e.stopPropagation(); if(cur) toggleFav(cur.id); else toast("Сначала включи трек"); };
 $("mini").onclick = () => { if(cur) openNP(); };
-$("npPP").onclick = toggle; $("npNext").onclick = () => next(false); $("npPrev").onclick = prev;
+$("npPP").onclick = toggle; $("npNext").onclick = () => next(false); $("npPrev").onclick = () => prev();
 $("npBack").onclick = () => skip(-15); $("npFwd").onclick = () => skip(15);
 $("npFav").onclick = () => { if(cur) toggleFav(cur.id); };
 $("npClose").onclick = closeNP;
@@ -873,7 +977,7 @@ audio.addEventListener("timeupdate", () => {
   $("mFill").style.width = p + "%";
   if(!dragging){ $("seek").value = Math.round(p * 10); $("seek").style.setProperty("--p", p + "%"); $("tCur").textContent = fmt(c); $("tLeft").textContent = "-" + fmt(d - c); }
   if(cur && !countedPlay && c > Math.min(30, d * .5)){ countedPlay = true; cur.plays = (cur.plays || 0) + 1; saveAll(); }
-  if(Date.now() - lastPosSave > 4000){ lastPosSave = Date.now(); store.set("svoi4-pos", c); try{ navigator.mediaSession?.setPositionState?.({ duration: d || 0, playbackRate: audio.playbackRate, position: Math.min(c, d || c) }); }catch{} }
+  if(Date.now() - lastPosSave > 4000){ lastPosSave = Date.now(); store.set("svoi4-pos", c); syncPos(); }
   if(cur && !cur.dur && d){ cur.dur = d; saveAll(); }
 });
 const syncPP = () => { const p = !audio.paused; [$("mPP"), $("npPP"), $("wavePlay")].forEach(b => b.innerHTML = p ? I.pause : I.play); $("app").classList.toggle("playing-now", p); try{ navigator.mediaSession.playbackState = p ? "playing" : "paused"; }catch{} };
@@ -901,13 +1005,23 @@ async function updateSession(){
   try{ const b = cur.art ? await getBlob("art", cur.id) : null; if(b && b !== true){ const data = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); artwork = [{ src: data, sizes:"512x512", type: b.type || "image/jpeg" }]; } }catch{}
   try{ navigator.mediaSession.metadata = new MediaMetadata({ title: cur.title, artist: cur.artist || "СВОИ", album: cur.album || playingFrom || "СВОИ", artwork }); }catch{}
 }
-if("mediaSession" in navigator){
+// Lock screen: play/pause, previous/next track and the scrubber. No ±10 handlers, so iOS shows track buttons.
+function setHandlers(){
+  if(!("mediaSession" in navigator)) return;
   const h = (a, f) => { try{ navigator.mediaSession.setActionHandler(a, f); }catch{} };
-  h("play", () => audio.play()); h("pause", () => audio.pause()); h("stop", () => audio.pause());
-  h("nexttrack", () => next(false)); h("previoustrack", prev);
   h("seekbackward", null); h("seekforward", null);
-  h("seekto", d => { if(d && d.seekTime != null) audio.currentTime = d.seekTime; });
+  h("play", () => audio.play()); h("pause", () => audio.pause()); h("stop", () => audio.pause());
+  h("nexttrack", () => next(false)); h("previoustrack", () => prev(true));
+  h("seekto", d => { if(d && d.seekTime != null){ audio.currentTime = d.seekTime; syncPos(); } });
 }
+function syncPos(){
+  const d = audio.duration;
+  if(!("mediaSession" in navigator) || !navigator.mediaSession.setPositionState || !isFinite(d) || !(d > 0)) return;
+  try{ navigator.mediaSession.setPositionState({ duration: d, playbackRate: audio.playbackRate || 1, position: Math.max(0, Math.min(audio.currentTime || 0, d)) }); }catch{}
+}
+setHandlers();
+["loadedmetadata","durationchange","play","pause","seeked","ratechange"].forEach(ev => audio.addEventListener(ev, syncPos));
+audio.addEventListener("play", setHandlers);
 
 $("npQueue").onclick = () => {
   const upNext = queue.slice(qi + 1).map(byId).filter(Boolean);
@@ -931,71 +1045,158 @@ $("favShuffle").onclick = () => { settings.shuffle = true; saveAll(); playList(f
 $("fPlayAll").onclick = () => { const f = folderOf(openFolder); if(!f) return; settings.shuffle = false; saveAll(); playList(f.ids.filter(byId), null, f.name); openNP(); };
 $("fShuffle").onclick = () => { const f = folderOf(openFolder); if(!f) return; settings.shuffle = true; saveAll(); playList(f.ids.filter(byId), null, f.name); openNP(); };
 
-// ---------- gasoline puddle on asphalt (WebGL) ----------
-const FRAG = `precision mediump float;
-uniform vec2 R; uniform float T; uniform float E; uniform float Z;
-float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f); return mix(mix(h(i), h(i+vec2(1,0)), f.x), mix(h(i+vec2(0,1)), h(i+vec2(1,1)), f.x), f.y); }
-float fbm(vec2 p){ float v = 0., a = .5; for(int i = 0; i < 5; i++){ v += a*n(p); p = p*2.03 + vec2(1.7, 9.2); a *= .5; } return v; }
+// ---------- graphics (WebGL, highp: on iPhone mediump noise turns blocky) ----------
+const NOISE = `precision highp float;
+float h(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f); return mix(mix(h(i), h(i+vec2(1.,0.)), f.x), mix(h(i+vec2(0.,1.)), h(i+vec2(1.,1.)), f.x), f.y); }
+float fbm(vec2 p){ float v = 0., a = .5; for(int i = 0; i < 5; i++){ v += a*n(p); p = p*2.03 + vec2(3.1, 1.7); a *= .5; } return v; }
 vec3 pal(float x){
-  x = fract(x) * 5.;
-  vec3 c0 = vec3(1., .42, .06), c1 = vec3(1., .86, .2), c2 = vec3(1., .2, .55), c3 = vec3(.55, .25, 1.), c4 = vec3(.2, .9, .85);
-  if(x < 1.) return mix(c0, c1, x); if(x < 2.) return mix(c1, c2, x - 1.); if(x < 3.) return mix(c2, c3, x - 2.); if(x < 4.) return mix(c3, c4, x - 3.); return mix(c4, c0, x - 4.);
+  x = fract(x) * 6.;
+  vec3 c0 = vec3(1., .42, .04), c1 = vec3(1., .9, .12), c2 = vec3(1., .16, .58), c3 = vec3(.62, .22, 1.), c4 = vec3(.12, .88, .95), c5 = vec3(1., .26, .4);
+  if(x < 1.) return mix(c0, c1, x); if(x < 2.) return mix(c1, c2, x - 1.); if(x < 3.) return mix(c2, c3, x - 2.);
+  if(x < 4.) return mix(c3, c4, x - 3.); if(x < 5.) return mix(c4, c5, x - 4.); return mix(c5, c0, x - 5.);
 }
+float grain(vec2 fc, float t){ return h(floor(fc) + floor(fract(t * 7.) * 97.) * vec2(17., 31.)) - .5; }
+`;
+// splash: gasoline puddle on asphalt
+const PUDDLE = NOISE + `uniform vec2 R; uniform float T; uniform float Z;
 void main(){
   vec2 uv = (gl_FragCoord.xy - .5*R) / min(R.x, R.y);
   float g = n(uv*150.)*.5 + n(uv*60.)*.3 + fbm(uv*6.)*.4;
-  vec3 asph = vec3(.06, .06, .07) + g*.08;
-  asph += smoothstep(.8, .96, n(uv*95. + 3.)) * vec3(.12, .12, .13);
+  vec3 asph = vec3(.06, .06, .07) + g*.08 + smoothstep(.8, .96, n(uv*95. + 3.)) * vec3(.12, .12, .13);
   vec2 p = uv * vec2(1., 1.12) / Z;
-  float w = fbm(p*1.8 + vec2(T*.03, -T*.02));
-  float d = length(p) + (w - .5)*.6 - .5 - E*.05;
-  float pud = smoothstep(.012, -.012, d);
-  float rim = smoothstep(.06, .0, abs(d));
+  float d = length(p) + (fbm(p*1.8 + vec2(T*.03, -T*.02)) - .5)*.6 - .5;
+  float pud = smoothstep(.012, -.012, d), rim = smoothstep(.06, .0, abs(d));
   vec2 q = p + .35*vec2(fbm(p*2.2 + T*.04), fbm(p*2.2 - vec2(T*.05, 3.1)));
   float th = fbm(q*3.1 + vec2(T*.06, T*.04))*2.2 + length(p)*1.6 - T*.05;
-  th += sin(length(p)*26. - T*2.4)*.04*E;
-  float bands = .55 + .45*sin(th*18.);
-  vec3 film = pal(th) * (.35 + .9*bands);
-  float dark = smoothstep(.25, .75, fbm(q*2.4 + 7. + T*.02));
-  vec3 inside = mix(vec3(.015, .012, .02), film, .25 + .75*dark);
+  vec3 film = pal(th) * (.35 + .9*(.55 + .45*sin(th*18.)));
+  vec3 inside = mix(vec3(.015, .012, .02), film, .25 + .75*smoothstep(.25, .75, fbm(q*2.4 + 7. + T*.02)));
   vec3 col = mix(asph*(1. - rim*.5), inside, pud);
   col += rim*(1. - pud)*mix(vec3(1., .45, .1), vec3(1., .2, .6), .5 + .5*sin(atan(p.y, p.x)*2. + T*.5))*.55;
   col += pud*pow(max(0., 1. - length(uv - vec2(-.16, .2))*2.4), 6.)*.4;
   col *= 1. - .55*smoothstep(.5, 1.25, length(uv));
+  col += grain(gl_FragCoord.xy, T) * .05;
   gl_FragColor = vec4(col, 1.);
 }`;
-function puddle(canvas, opts = {}){
-  const gl = canvas.getContext("webgl", { antialias:false, preserveDrawingBuffer: !!opts.keep }) || canvas.getContext("experimental-webgl");
-  if(!gl){ canvas.parentElement.classList.add("fallback-bg"); canvas.remove(); return null; }
-  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+// home: circular neon liquid equalizer on dark brushed metal with film grain
+const WAVE = NOISE + `uniform vec2 R; uniform float T; uniform vec3 B; uniform float K; uniform vec2 C; uniform float S; uniform float P;
+void main(){
+  vec2 fc = gl_FragCoord.xy; float m = min(R.x, R.y); vec2 q = fc / m; float t = T;
+  float br = n(vec2(q.x * 3., q.y * 380.)) * .55 + n(vec2(q.x * 9., q.y * 1100.)) * .45;
+  float sheen = .5 + .5 * sin(q.x * 2.4 - q.y * 1.1 + .8);
+  vec3 col = vec3(.07, .073, .085) + vec3(.06, .062, .072) * sheen * sheen + (br - .5) * .05 + (fbm(q * 2.5) - .5) * .045;
+  vec2 p = (fc - C) / S; float r = length(p), a = atan(p.y, p.x);
+  float lq = fbm(p * 1.3 + vec2(t * .16, -t * .12)) - .5;
+  float eq = B.x * (.55 + .45 * sin(a * 3. + t * .6)) + B.y * .7 * (.5 + .5 * sin(a * 6. - t * .9 + 1.3)) + B.z * .5 * (.5 + .5 * sin(a * 11. + t * 1.4 + 2.1));
+  float edge = .78 + eq * .2 + lq * .22 + K * .08;
+  float d = r - edge, ins = smoothstep(.012, -.012, d);
+  vec3 rim = pal(a / 6.2832 + t * .04);
+  col += rim * exp(-max(d, 0.) * 6.) * (1. - ins) * (.28 + .5 * B.x + .4 * K);
+  // equalizer bars around the liquid
+  float N = 72., ai = (a / 6.2832 + .5) * N, id = floor(ai), fr = fract(ai);
+  float band = B.x * .55 + B.y * .45 * (.5 + .5 * sin(id * .9 + t)) + B.z * .45 * (.5 + .5 * sin(id * 2.3 + 1. - t * 1.3));
+  float bh = .03 + .34 * band * (.35 + .65 * n(vec2(id * .37, t * 2.4)));
+  float rr = r - edge - .06;
+  float bar = step(0., rr) * smoothstep(bh, bh - .025, rr) * smoothstep(.1, .3, fr) * smoothstep(.9, .7, fr);
+  col += pal(id / N + t * .05) * bar * (.55 + .7 * band) * (1. - ins);
+  if(r < 1.6){
+    vec2 w = p * 1.5; float ts = t * (.1 + .22 * P) + B.x * .15;
+    vec2 wp = vec2(fbm(w + vec2(ts, 0.)), fbm(w + vec2(5.2, -ts)));
+    float f = fbm(w + 2.4 * wp + vec2(-ts * .7, ts * .5));
+    float th = f * 2.3 + r * 1.1 - t * .06 + B.x * .2;
+    vec3 fl = pal(th) * (.5 + .75 * (.55 + .45 * sin(th * 15.)));
+    fl *= mix(.5, 1.05, smoothstep(.0, .6, r));
+    fl += smoothstep(.07, .0, abs(d)) * vec3(1., .92, .75) * .35;
+    fl += pow(max(0., 1. - length(p - vec2(-.38, .42)) * 1.7), 4.) * .45;
+    col = mix(col, fl, ins);
+  }
+  vec2 uv = fc / R - .5; uv.x *= R.x / m; uv.y *= R.y / m;
+  col *= 1. - .5 * smoothstep(.45, 1.1, length(uv * .9));
+  col += grain(fc, t) * .075;
+  col += step(.996, h(vec2(floor(fc.x / 2.), floor(t * 10.)))) * .045;
+  col *= .975 + .025 * h(vec2(floor(t * 20.), 7.));
+  gl_FragColor = vec4(col, 1.);
+}`;
+function glView(canvas, frag, scale){
+  const gl = canvas.getContext("webgl", { antialias:false }) || canvas.getContext("experimental-webgl");
+  const fail = () => { canvas.parentElement.classList.add("fallback-bg"); canvas.remove(); return null; };
+  if(!gl) return fail();
+  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); if(!gl.getShaderParameter(x, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(x)); return x; };
   const pr = gl.createProgram();
-  gl.attachShader(pr, sh(gl.VERTEX_SHADER, "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}")); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(pr);
-  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)){ canvas.parentElement.classList.add("fallback-bg"); canvas.remove(); return null; }
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}")); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, frag)); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return fail();
   gl.useProgram(pr);
-  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, "a"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = k => gl.getUniformLocation(pr, k), uR = U("R"), uT = U("T"), uE = U("E"), uZ = U("Z");
-  const scale = opts.scale || .5;
-  const size = () => { canvas.width = Math.max(2, Math.round(canvas.clientWidth * scale)); canvas.height = Math.max(2, Math.round(canvas.clientHeight * scale)); gl.viewport(0, 0, canvas.width, canvas.height); };
-  size(); addEventListener("resize", size);
-  return (t, e, z) => { gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, t); gl.uniform1f(uE, e); gl.uniform1f(uZ, z); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); };
+  const U = {}, u = k => U[k] || (U[k] = gl.getUniformLocation(pr, k));
+  const size = () => { const w = Math.max(2, Math.round(canvas.clientWidth * scale)), h = Math.max(2, Math.round(canvas.clientHeight * scale)); if(canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); } };
+  size(); new ResizeObserver(size).observe(canvas);
+  return { scale, el: canvas,
+    set(k, ...v){ const l = u(k); if(v.length === 1) gl.uniform1f(l, v[0]); else if(v.length === 2) gl.uniform2f(l, v[0], v[1]); else gl.uniform3f(l, v[0], v[1], v[2]); },
+    draw(){ gl.uniform2f(u("R"), canvas.width, canvas.height); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); } };
 }
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const drawBg = puddle($("bgCv"), { scale: desktop() ? .45 : .5 });
-let E = 0;
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+const bg = glView($("bgCv"), WAVE, desktop() ? Math.min(DPR, 1.25) : Math.min(DPR * .5, 1.5));
+
+// beat analysis: a decoded copy of the track gives real low/mid/high energy; playback itself stays a plain <audio> (works in background)
+const envCache = new Map(); let envBusy = null;
+async function analyze(id, blob){
+  if(!id || envCache.has(id) || envBusy === id) return; envBusy = id;
+  try{
+    const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext; if(!Ctx) return;
+    const ab = await blob.arrayBuffer(), ac = new Ctx(1, 2, 22050);
+    const buf = await new Promise((res, rej) => { const pr = ac.decodeAudioData(ab, res, rej); if(pr && pr.then) pr.then(res, rej); });
+    const sr = buf.sampleRate, hop = Math.round(sr / 43), c0 = buf.getChannelData(0), c1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
+    const nF = Math.floor(c0.length / hop), raw = new Float32Array(nF * 3);
+    const a1 = 1 - Math.exp(-2 * Math.PI * 150 / sr), a2 = 1 - Math.exp(-2 * Math.PI * 2000 / sr);
+    let l1 = 0, l2 = 0;
+    for(let f = 0; f < nF; f++){
+      let s0 = 0, s1 = 0, s2 = 0; const o = f * hop;
+      for(let i = 0; i < hop; i++){ const x = c1 ? (c0[o+i] + c1[o+i]) * .5 : c0[o+i]; l1 += (x - l1) * a1; l2 += (x - l2) * a2; const mi = l2 - l1, hi = x - l2; s0 += l1*l1; s1 += mi*mi; s2 += hi*hi; }
+      raw[f*3] = Math.sqrt(s0 / hop); raw[f*3+1] = Math.sqrt(s1 / hop); raw[f*3+2] = Math.sqrt(s2 / hop);
+      if(f % 1500 === 1499) await new Promise(r => setTimeout(r, 0));
+    }
+    const out = new Uint8Array(nF * 4);
+    for(let k = 0; k < 3; k++){ const v = []; for(let f = 0; f < nF; f += 3) v.push(raw[f*3+k]); v.sort((x, y) => x - y); const qv = v[Math.floor(v.length * .95)] || 1; for(let f = 0; f < nF; f++) out[f*4+k] = Math.min(255, raw[f*3+k] / qv * 215); }
+    let avg = 0; for(let f = 0; f < nF; f++){ const lo = out[f*4]; out[f*4+3] = Math.min(255, Math.max(0, lo - avg) * 3); avg += (lo - avg) * .15; }
+    envCache.set(id, { b: out, n: nF, fps: sr / hop });
+    if(envCache.size > 6) envCache.delete(envCache.keys().next().value);
+  }catch(e){ console.warn("analyze", e); }
+  finally{ if(envBusy === id) envBusy = null; }
+}
+
+let stageC = [0, 0], stageS = 120;
+function placeStage(){
+  const st = $("stage").getBoundingClientRect(), b = $("wavePlay").getBoundingClientRect(), cv = $("bgCv")?.getBoundingClientRect();
+  if(!st.height || !cv) return;
+  stageC = [b.left + b.width / 2 - cv.left, cv.height - (b.top + b.height / 2 - cv.top)];
+  stageS = Math.max(70, Math.min(st.width * .36, st.height * .36, 230));
+}
+const BV = [0, 0, 0]; let KV = 0, PV = 0, E = 0;
 function loop(ts){
-  const t = reduce ? 3 : ts / 1000, target = !audio.paused ? .35 + .3 * Math.max(0, Math.sin(t * 7.5)) * Math.max(0, Math.sin(t * 1.9)) : 0;
-  E += (target - E) * .08; document.documentElement.style.setProperty("--e", E.toFixed(3));
-  if(drawBg && !document.hidden) drawBg(t, E, 1);
-  if(!reduce) requestAnimationFrame(loop);
+  const t = reduce ? 3 : ts / 1000, playing = !audio.paused;
+  let tb = [.16 + .05 * Math.sin(t * 1.3), .1 + .04 * Math.sin(t * .9 + 1), .07], tk = 0;
+  if(playing){
+    const env = cur && envCache.get(cur.id);
+    if(env){ const i = Math.floor((audio.currentTime + .03) * env.fps); if(i >= 0 && i < env.n){ tb = [env.b[i*4] / 255, env.b[i*4+1] / 255, env.b[i*4+2] / 255]; tk = env.b[i*4+3] / 255; } }
+    else { const beat = Math.pow(Math.max(0, Math.sin(t * Math.PI * 2)), 6); tb = [.45 + .5 * beat, .4 + .2 * Math.sin(t * 3.1), .3 + .2 * Math.sin(t * 5.3)]; tk = beat * .6; }
+  }
+  for(let k = 0; k < 3; k++) BV[k] += (tb[k] - BV[k]) * (tb[k] > BV[k] ? .55 : .12);
+  KV += (tk - KV) * (tk > KV ? .6 : .14); PV += ((playing ? 1 : 0) - PV) * .03;
+  E = Math.min(1, BV[0] * .6 + KV * .5); document.documentElement.style.setProperty("--e", E.toFixed(3));
+  if(bg && view === "home" && !document.hidden){
+    const s = bg.scale; bg.set("T", t); bg.set("B", BV[0], BV[1], BV[2]); bg.set("K", KV); bg.set("P", PV);
+    bg.set("C", stageC[0] * s, stageC[1] * s); bg.set("S", stageS * s); bg.draw();
+  }
+  if(!reduce || playing) requestAnimationFrame(loop); else setTimeout(() => requestAnimationFrame(loop), 500);
 }
 requestAnimationFrame(loop);
 
-// splash
+// splash: animated gasoline puddle
 (() => {
-  const sp = $("splash"), draw = puddle($("splashCv"), { scale:.5 }); let t0 = null, alive = true;
-  const f = ts => { if(!alive) return; if(t0 === null) t0 = ts; const k = Math.min(1, (ts - t0) / 1800); if(draw) draw(ts / 1000 + 4, 0, 1.6 - .6 * (1 - Math.pow(1 - k, 3))); requestAnimationFrame(f); };
+  const sp = $("splash"), v = glView($("splashCv"), PUDDLE, Math.min(DPR * .5, 1.5)); let t0 = null, alive = true;
+  const f = ts => { if(!alive) return; if(t0 === null) t0 = ts; const k = Math.min(1, (ts - t0) / 1800); if(v){ v.set("T", ts / 1000 + 4); v.set("Z", 1.6 - .6 * (1 - Math.pow(1 - k, 3))); v.draw(); } requestAnimationFrame(f); };
   requestAnimationFrame(f);
   setTimeout(() => { sp.classList.add("gone"); setTimeout(() => { alive = false; sp.remove(); }, 800); }, reduce ? 500 : 2100);
 })();
