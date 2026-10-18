@@ -222,9 +222,9 @@
   },
   {
    "id": "mvdlw3wcg4tby",
-   "title": "rekudo-lookbuffalo-84-plavno-i-akkuratno",
-   "artist": "",
-   "style": "",
+   "title": "плавно и аккуратно",
+   "artist": "rekudo-lookbuffalo-84",
+   "style": "Рэп",
    "file": "music/mvdlw3wcg4tby.mp3",
    "size": 7767794,
    "added": "2026-10-18"
@@ -572,5 +572,5 @@
    "added": "2026-10-18"
   }
  ],
- "rev": 1792317263142
+ "rev": 1792317305662
 }
