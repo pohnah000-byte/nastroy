@@ -120,6 +120,7 @@ button:focus-visible,.row:focus-visible,.drop:focus-visible{outline:2px solid va
 .drop{border:1.5px dashed var(--line);border-radius:20px;padding:30px 16px;text-align:center;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;gap:6px;align-items:center;background:rgb(255 255 255 / .02)}
 .drop.on{border-color:var(--gold);color:var(--ink)}
 .drop strong{color:var(--ink);font-size:18px}
+.errbox{background:rgb(196 90 119 / .15);border:1px solid var(--rose);color:var(--ink);border-radius:16px;padding:14px 16px;font-size:15px;font-weight:600;line-height:1.45}
 .prog{display:flex;flex-direction:column;gap:8px}
 .prog .trk{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
 .prog .trk i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s}
@@ -258,8 +259,10 @@ nav button[aria-current="page"] svg{color:var(--gold);transform:translateY(-3px)
           <div class="drop" id="drop" tabindex="0" role="button">
             <strong id="dropTitle">Выбери аудиофайлы</strong>
             <span>любое количество · MP3, M4A, WAV, FLAC, OGG · до 95 МБ каждый</span>
+            <span style="font-size:13px">На iPhone файлы берутся из приложения «Файлы» (iCloud Drive, «Загрузки», Telegram → «Сохранить в Файлы»). Песни из Apple Music выбрать нельзя.</span>
           </div>
           <input type="file" id="upFile" accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.aac" multiple hidden>
+          <div class="errbox" id="errBox" hidden></div>
           <div class="prog" id="prog" hidden><span class="count" id="progText"></span><div class="trk"><i id="progFill"></i></div></div>
           <div class="toolbar"><h2>Все треки</h2><div class="chips"><span class="count" id="admCount"></span><button class="chip" id="selBtn">Выбрать</button></div></div>
           <p class="hint">Перетаскивай треки за ⋮⋮, чтобы поменять порядок. Изменения сохраняются и через 1–2 минуты появляются у всех слушателей.</p>
@@ -433,6 +436,11 @@ function watchDeploy(rev){
   }, 8000);
 }
 function ghError(e){
+  const msg = ghErrorText(e); const d = e && e.detail ? ` (GitHub: ${e.detail})` : "";
+  const box = $("errBox"); if(box){ box.hidden = false; box.textContent = msg + d; }
+  return msg;
+}
+function ghErrorText(e){
   if(e.status === 401) return "Ключ GitHub не подходит или истёк. Создай новый.";
   if(e.status === 403 || e.status === 404) return "У ключа нет доступа к репозиторию nastroy (нужно Contents: Read and write).";
   if(e.status === 413 || e.status === 422) return "GitHub не принял файл. Возможно, он слишком большой.";
@@ -553,7 +561,7 @@ $("tokenForm").onsubmit = async e => {
   e.preventDefault();
   const v = $("tokenInput").value.trim(); if(!v){ $("tokenInput").focus(); return; }
   $("tokenErr").textContent = "Проверяю…"; const old = token; token = v;
-  try{ const r = await gh(""); if(!r.permissions || !r.permissions.push) throw Object.assign(new Error("no push"), {status:403});
+  try{ await gh(""); await gh("/git/blobs", {method:"POST", body: JSON.stringify({content:"svoi-check", encoding:"utf-8"})});
     store.set("svoi-gh-token", token); $("tokenInput").value = ""; $("tokenErr").textContent = ""; toast("GitHub подключён"); renderAll(); }
   catch(err){ token = old; $("tokenErr").textContent = ghError(err); }
 };
@@ -596,9 +604,9 @@ async function upload(fileList){
   let files = [...fileList].filter(f => f.type.startsWith("audio/") || /\.(mp3|m4a|wav|flac|ogg|aac|opus)$/i.test(f.name));
   const big = files.filter(f => f.size > MAX); files = files.filter(f => f.size <= MAX);
   if(big.length) toast(`Пропущено ${big.length}: файл больше 95 МБ`);
-  if(!files.length){ if(!big.length) toast("Это не аудиофайлы"); return; }
+  if(!files.length){ if(!big.length){ $("errBox").hidden = false; $("errBox").textContent = "Выбранные файлы не похожи на музыку. Подходят MP3, M4A, WAV, FLAC, OGG, AAC."; } return; }
   if(busy){ toast("Дождись окончания предыдущего действия"); return; }
-  busy = true; $("prog").hidden = false; let done = 0, failed = 0;
+  busy = true; $("prog").hidden = false; $("errBox").hidden = true; let done = 0, failed = 0;
   const style = upStyleSel;
   const show = () => { $("progText").textContent = `Загружаю ${Math.min(done+1, files.length)} из ${files.length}…`; $("progFill").style.width = (done / files.length * 100) + "%"; };
   setStatus('<span class="dot warn"></span>Загружаю…');
