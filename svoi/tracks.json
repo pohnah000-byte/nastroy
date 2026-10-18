@@ -86,15 +86,6 @@
    "added": "2026-10-18"
   },
   {
-   "id": "mvdluun7dpmrj",
-   "title": "gemini music",
-   "artist": "",
-   "style": "",
-   "file": "music/mvdluun7dpmrj.mp3",
-   "size": 3876843,
-   "added": "2026-10-18"
-  },
-  {
    "id": "mvdluun70ybwg",
    "title": "Ночь... (hitmos.fm)",
    "artist": "SG17.06, st!lled",
@@ -599,5 +590,5 @@
    "added": "2026-10-18"
   }
  ],
- "rev": 1792315433469
+ "rev": 1792315449384
 }
