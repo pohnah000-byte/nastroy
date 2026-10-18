@@ -336,7 +336,61 @@
    "file": "music/mvdlwhxhsyjym.mp3",
    "size": 5515654,
    "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnllzy6y",
+   "title": "ne nuzhna (muztune.me)",
+   "artist": "loboda",
+   "style": "",
+   "file": "music/mvdlwvnllzy6y.mp3",
+   "size": 8368128,
+   "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnlb7yzq",
+   "title": "Avtomat (supermusic.me)",
+   "artist": "Nebezao",
+   "style": "",
+   "file": "music/mvdlwvnlb7yzq.mp3",
+   "size": 6665977,
+   "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnlcjmvy",
+   "title": "Верь мне, наверное",
+   "artist": "Сюзанна",
+   "style": "",
+   "file": "music/mvdlwvnlcjmvy.mp3",
+   "size": 6603077,
+   "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnl6prfy",
+   "title": "Zanovo zavoevat (musmore.com)",
+   "artist": "Pepel Nahudi",
+   "style": "",
+   "file": "music/mvdlwvnl6prfy.mp3",
+   "size": 4518744,
+   "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnlygyqd",
+   "title": "Witcher (musmore.com)",
+   "artist": "Ambassador",
+   "style": "",
+   "file": "music/mvdlwvnlygyqd.mp3",
+   "size": 4644216,
+   "added": "2026-10-18"
+  },
+  {
+   "id": "mvdlwvnlsgmkk",
+   "title": "Tormoza (musmore.com)",
+   "artist": "CAPTOWN",
+   "style": "",
+   "file": "music/mvdlwvnlsgmkk.mp3",
+   "size": 5202212,
+   "added": "2026-10-18"
   }
  ],
- "rev": 1792314726882
+ "rev": 1792314743521
 }
