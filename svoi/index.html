@@ -12,194 +12,161 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Manrope:wght@400;500;600;700&display=swap">
-</head>
-<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Manrope:wght@500;600;700;800&display=swap">
 <style>
-*,*::before,*::after{box-sizing:border-box}
-img{max-width:100%}
-[hidden]{display:none!important}
-header{padding-top:calc(12px + env(safe-area-inset-top,0px))!important}
-html{-webkit-text-size-adjust:100%}
-body{-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-/* Layout: экран-волна во весь рост, сверху логотип, снизу мини-плеер и док из шести вкладок */
+/* Layout: волна на весь экран телефона; сверху и снизу — стеклянные плашки поверх неё */
 :root{
-  --bg:#141318; --panel:#0e0d12; --raise:#1d1b23; --line:#2a2732;
-  --ink:#f3eff7; --muted:#8f8a9b; --gold:#f2c84b; --amber:#e3a24a; --rose:#b8546e; --plum:#5a2f63; --indigo:#2c2847;
+  --bg:#121118; --panel:#0c0b10; --raise:#1c1a23; --line:#2d2a36;
+  --ink:#f6f3fa; --muted:#b4aec2; --gold:#f2c84b; --amber:#e3a24a; --rose:#c45a77; --plum:#5a2f63;
   --f-display:"Unbounded","Manrope",system-ui,sans-serif;
   --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --hh:96px; --bh:190px; --e:0; --ease:cubic-bezier(.2,.8,.2,1);
+  --gl:max(18px,env(safe-area-inset-left,0px)); --gr:max(18px,env(safe-area-inset-right,0px));
   color-scheme:dark;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
-.app{height:100%;display:grid;grid-template-rows:auto 1fr auto auto auto}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--panel);
-  padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  box-shadow:0 8px 24px rgb(0 0 0 / .35);z-index:3}
-.logo{font-family:var(--f-display);font-weight:800;font-size:26px;letter-spacing:.02em;line-height:1}
-.who{text-align:right;font-size:12px;color:var(--muted);line-height:1.25}
-.who b{display:block;color:var(--ink);font-size:13px}
-main{position:relative;overflow:hidden;min-height:0}
-canvas#wave{position:absolute;inset:0;width:100%;height:100%}
-.view{position:absolute;inset:0;overflow-y:auto;padding-block:20px 24px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.view.home{display:grid;place-items:center;overflow:hidden;background:transparent}
-.view:not(.home){background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(18px)}
-.inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
-.center{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;z-index:1}
-.bigplay{width:72px;height:72px;border-radius:50%;border:0;background:var(--ink);color:var(--panel);display:grid;place-items:center;cursor:pointer;
-  box-shadow:0 10px 30px rgb(0 0 0 / .35);transition:transform .15s}
-.bigplay:hover{transform:scale(1.06)}
-.bigplay svg{width:26px;height:26px}
-.wavetitle{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,4vw,32px);margin:4px 0 0;text-shadow:0 2px 16px rgb(0 0 0 / .45)}
-.wavesub{margin:0;color:var(--ink);opacity:.8;font-size:14px;text-shadow:0 1px 8px rgb(0 0 0 / .5)}
-h2{font-family:var(--f-display);font-weight:600;font-size:20px;margin:0;text-wrap:balance}
-.hint{color:var(--muted);font-size:13px;margin:0;line-height:1.5}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--panel)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{position:fixed;inset:0;overflow:hidden;background:var(--bg)}
+main{position:absolute;inset:0}
+.wavewrap{position:absolute;inset:-40px;filter:blur(18px) saturate(1.15);transform:translateZ(0);will-change:filter}
+canvas#wave{position:absolute;inset:40px;width:calc(100% - 80px);height:calc(100% - 80px)}
+main::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+main::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgb(8 7 12 / .7) 100%)}
+
+/* top & bottom glass bars */
+header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) var(--gr) 18px var(--gl);
+  background:linear-gradient(to bottom,rgb(12 11 16 / .94),rgb(12 11 16 / .72));-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);
+  border-bottom:1px solid rgb(255 255 255 / .07)}
+.logo{font-family:var(--f-display);font-weight:800;font-size:32px;letter-spacing:.02em;line-height:1;color:var(--ink)}
+.logo i{font-style:normal;color:var(--gold)}
+.status{font-size:13px;font-weight:700;color:var(--muted);text-align:right;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:#4cc38a;box-shadow:0 0 10px #4cc38a}
+.dot.warn{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.bottom{position:absolute;left:0;right:0;bottom:0;z-index:5;background:rgb(12 11 16 / .86);-webkit-backdrop-filter:blur(26px) saturate(1.4);backdrop-filter:blur(26px) saturate(1.4);border-top:1px solid rgb(255 255 255 / .08)}
+
+/* views */
+.view{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:1;
+  padding:calc(var(--hh) + 18px) var(--gr) calc(var(--bh) + 24px) var(--gl)}
+.view:not(.home){background:rgb(18 17 24 / .9)}
+.view.home{display:grid;place-items:center;overflow:hidden}
+.inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.center{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0;line-height:1.2;text-wrap:balance}
+.hint{color:var(--muted);font-size:15px;margin:0;line-height:1.5}
+.lbl{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:600}
+.card{background:var(--raise);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* hero */
+.bigplay{position:relative;width:92px;height:92px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;color:#121118;
+  background:radial-gradient(circle at 32% 26%,#fff,#efe9f5 55%,#cfc5de);
+  box-shadow:0 0 0 1px rgb(255 255 255 / .3),inset 0 -5px 12px rgb(0 0 0 / .16);
+  transform:scale(calc(1 + var(--e) * .14));transition:transform .18s linear}
+.bigplay svg{width:30px;height:30px}
+.bigplay::before,.bigplay::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid rgb(255 236 190 / .55);opacity:0;pointer-events:none}
+.wavetitle{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,8vw,40px);margin:6px 0 0;text-shadow:0 1px 3px rgb(0 0 0 / .45),0 0 22px rgb(40 15 40 / .35)}
+.wavetitle span{display:inline-block}
+.wavesub{margin:0;font-size:17px;font-weight:700;color:var(--ink);text-shadow:0 1px 3px rgb(0 0 0 / .5),0 0 18px rgb(40 15 40 / .4)}
+
+/* chips & buttons */
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--raise);color:var(--ink);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--gold);color:var(--panel);border-color:var(--gold)}
+.chip{font-size:15px;font-weight:700;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--raise);color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip small{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--gold);color:#16131c;border-color:var(--gold);box-shadow:0 6px 22px -6px rgb(242 200 75 / .7)}
+.chip[aria-pressed="true"] small{color:#3a3020}
+.chip.add{border-style:dashed;background:transparent;color:var(--muted)}
+.btn{font-size:16px;font-weight:800;border:0;border-radius:999px;padding:14px 22px;cursor:pointer;background:var(--gold);color:#16131c;min-height:50px}
+.btn.ghost{background:var(--raise);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--rose);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=password],select{width:100%;font-size:17px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-height:52px;color:var(--ink);-webkit-appearance:none;appearance:none}
+input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgb(242 200 75 / .25)}
+button:focus-visible,.row:focus-visible,.drop:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.chip,.btn,.ib,.pp,nav button,.row{transition:background-color .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),transform .25s var(--ease),box-shadow .3s var(--ease),opacity .3s}
+.chip:active,.btn:active,.ib:active,.pp:active{transform:scale(.94)}
+
+/* track rows */
 .list{display:flex;flex-direction:column}
-.row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:8px 6px;border-radius:12px;cursor:pointer}
+.row{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:10px 8px;border-radius:16px;cursor:pointer}
+.row.adm{grid-template-columns:26px 52px 1fr auto}
 .row:hover{background:var(--raise)}
 .row.playing .t1{color:var(--gold)}
-.cover{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:15px;color:var(--panel)}
-.meta{min-width:0}
-.t1{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.t2{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nosound{font-size:11px;color:var(--amber);font-weight:700;margin-left:6px}
-.acts{display:flex;gap:2px}
-.ib{width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
-.ib:hover{background:var(--line);color:var(--ink)}
-.ib svg{width:18px;height:18px}
-.ib.on{color:var(--rose)}
-.empty{border:1.5px dashed var(--line);border-radius:16px;padding:28px 18px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
-.btn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:11px 18px;cursor:pointer;background:var(--gold);color:var(--panel)}
-.btn.ghost{background:var(--raise);color:var(--ink);border:1px solid var(--line)}
-textarea,input[type=text],input[type=number],select{width:100%;font:inherit;color:var(--ink);background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-textarea{min-height:150px;resize:vertical}
-.drop{border:1.5px dashed var(--line);border-radius:16px;padding:30px 16px;text-align:center;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;gap:6px;align-items:center}
-.drop.on{border-color:var(--gold);color:var(--ink)}
-.drop strong{color:var(--ink);font-size:16px}
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
-.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-/* mini player */
-.mini{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--raise);border-top:1px solid var(--line);
-  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));position:relative}
-.bar{position:absolute;left:0;right:0;top:-2px;height:3px;background:var(--line);cursor:pointer}
-.bar i{display:block;height:100%;width:0;background:var(--gold)}
-.ctrl{display:flex;gap:4px;align-items:center}
-.pp{width:42px;height:42px;border-radius:50%;border:0;background:var(--ink);color:var(--panel);display:grid;place-items:center;cursor:pointer}
-.pp svg{width:18px;height:18px}
-.time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:6px}
-@media (max-width:520px){.time{display:none}}
-/* dock */
-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-nav button{font:inherit;font-size:12px;font-weight:600;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 2px 10px;cursor:pointer;position:relative}
-nav button svg{width:22px;height:22px}
-nav button:hover{color:var(--ink)}
-nav button[aria-current="page"]{color:var(--ink)}
-nav button[aria-current="page"] svg{color:var(--gold)}
-
-.badge{position:absolute;top:6px;left:calc(50% + 8px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--rose);color:var(--ink);font-size:10px;line-height:16px;font-variant-numeric:tabular-nums}
-
-button:focus-visible,.row:focus-visible,.drop:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-/* sheet */
-.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .55);z-index:20;display:grid;align-items:end;justify-items:center}
-.sheet{width:min(520px,100%);background:var(--raise);border-radius:20px 20px 0 0;display:flex;flex-direction:column;gap:12px;
-  padding-block:20px calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
-.sheet label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row{grid-template-columns:22px 44px 1fr auto}
-.grip{width:22px;height:44px;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none}
-.grip svg{width:16px;height:16px}
-.grip:active{cursor:grabbing}
-.nogrip .grip{visibility:hidden}
-.sortable-ghost{opacity:.35}
-.sortable-chosen{background:var(--raise)}
-.ask{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
-.ask button{font:inherit;font-size:12px;font-weight:700;border:0;border-radius:999px;padding:7px 12px;cursor:pointer}
-.ask .yes{background:var(--rose);color:var(--ink)}
-.ask .no{background:var(--line);color:var(--ink)}
-.prog{display:flex;flex-direction:column;gap:6px}
-.prog .track{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
-.prog .track i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4cc38a;margin-right:6px;vertical-align:middle}
-.dot.warn{background:var(--amber)}
-.stylepick{display:flex;flex-direction:column;gap:10px;background:var(--raise);border:1px solid var(--line);border-radius:16px;padding:14px}
-.lbl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.chip.add{border-style:dashed;background:transparent;color:var(--muted)}
-.addstyle{display:flex;gap:8px;flex-wrap:wrap}
-.addstyle input{flex:1 1 180px;min-width:0}
-.selbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--panel);border-top:1px solid var(--line);font-weight:700;
-  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.btn.danger{background:var(--rose);color:var(--ink)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.check{width:22px;height:22px;border-radius:7px;border:2px solid var(--muted);display:grid;place-items:center;color:var(--panel)}
 .row.picked{background:var(--raise)}
+.cover{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:18px;color:#16131c;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .12),0 6px 18px -8px rgb(0 0 0 / .6)}
+.meta{min-width:0}
+.t1{font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t2{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:11px;font-weight:800;color:var(--amber);margin-left:6px;text-transform:uppercase;letter-spacing:.04em}
+.acts{display:flex;gap:2px}
+.ib{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.ib:hover{background:var(--line);color:var(--ink)}
+.ib svg{width:22px;height:22px}
+.ib.on{color:var(--rose)}
+.grip{width:26px;height:52px;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none}
+.grip svg{width:18px;height:18px}
+.check{width:24px;height:24px;border-radius:8px;border:2px solid var(--muted);display:grid;place-items:center;color:#16131c}
 .row.picked .check{background:var(--gold);border-color:var(--gold)}
-.check svg{width:14px;height:14px}
-.selecting .grip{display:none}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.fcard{font:inherit;text-align:left;border:1px solid var(--line);background:var(--raise);color:var(--ink);border-radius:16px;padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:10px;min-height:118px;min-width:0}
-.fcard:hover{border-color:var(--gold)}
-.fcard .fi{width:34px;height:34px;color:var(--gold)}
-.fcard b{font-size:15px;overflow-wrap:anywhere}
-.fcard span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.fcard.new{border-style:dashed;background:transparent;color:var(--muted);justify-content:center;align-items:center;text-align:center}
-.fcard.new .fi{color:var(--muted)}
-.fcard.none .fi{color:var(--muted)}
-.lockbox{align-items:center;text-align:center;padding-top:8vh}
-.lockicon{width:64px;height:64px;border-radius:50%;background:var(--raise);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold)}
-.lockicon svg{width:28px;height:28px}
-.lockform{display:flex;gap:8px;width:min(360px,100%)}
-.lockform input{flex:1;min-width:0}
-.shake{animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-@media (prefers-reduced-motion:reduce){.shake{animation:none}}
-.flist{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto}
-.fopt{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:600}
-.fopt:hover{border-color:var(--gold)}
+.check svg{width:15px;height:15px}
+.sortable-ghost{opacity:.35}
+.empty{border:1.5px dashed var(--line);border-radius:20px;padding:30px 18px;text-align:center;color:var(--muted);font-size:16px;line-height:1.5}
+
+/* admin */
+.drop{border:1.5px dashed var(--line);border-radius:20px;padding:30px 16px;text-align:center;cursor:pointer;color:var(--muted);display:flex;flex-direction:column;gap:6px;align-items:center;background:rgb(255 255 255 / .02)}
+.drop.on{border-color:var(--gold);color:var(--ink)}
+.drop strong{color:var(--ink);font-size:18px}
+.prog{display:flex;flex-direction:column;gap:8px}
+.prog .trk{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.prog .trk i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s}
+.manage{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .inline{display:flex;gap:8px}
 .inline input{flex:1;min-width:0}
-@media (max-width:420px){nav button{font-size:10.5px}}
-/* ---- premium layer ---- */
-:root{--e:0;--ease:cubic-bezier(.2,.8,.2,1)}
-main::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.07;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-main::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center,transparent 45%,rgb(8 7 12 / .65) 100%)}
-canvas#wave{z-index:0;filter:blur(16px) saturate(1.15)}
-.view{z-index:1}
-.filters{display:flex;flex-direction:column;gap:10px;background:var(--raise);border:1px solid var(--line);border-radius:18px;padding:14px}
-.manage{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:4px;border-top:1px solid var(--line)}
-.manage .hint{flex:1 1 200px}
-.chip,.btn,.fopt,.ib,.pp,nav button{transition:background-color .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease),transform .25s var(--ease),box-shadow .3s var(--ease),opacity .3s}
-.chip:active,.btn:active,.ib:active,.pp:active{transform:scale(.94)}
-.chip[aria-pressed="true"]{box-shadow:0 6px 22px -6px color-mix(in srgb,var(--gold) 70%,transparent)}
-.logo{background:linear-gradient(100deg,var(--ink) 20%,var(--gold) 45%,var(--ink) 70%);background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent}
-.bigplay{position:relative;width:84px;height:84px;background:radial-gradient(circle at 32% 26%,#ffffff,#efe9f5 55%,#cfc5de);
-  box-shadow:0 22px 60px -10px rgb(0 0 0 / .6),0 0 0 1px rgb(255 255 255 / .25),inset 0 -5px 12px rgb(0 0 0 / .14);
-  transform:scale(calc(1 + var(--e) * .14));transition:transform .18s linear,box-shadow .4s var(--ease)}
-.bigplay:hover{transform:scale(calc(1.06 + var(--e) * .14));box-shadow:0 26px 70px -10px rgb(0 0 0 / .65),0 0 0 1px rgb(255 255 255 / .4),0 0 60px -6px color-mix(in srgb,var(--gold) 60%,transparent)}
-.bigplay::before,.bigplay::after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1.5px solid rgb(255 236 190 / .55);opacity:0;pointer-events:none}
-.bigplay svg{width:28px;height:28px;position:relative}
-.wavetitle span{display:inline-block}
-.dock-ind{position:absolute;top:0;left:0;width:34px;height:3px;border-radius:0 0 3px 3px;background:var(--gold);box-shadow:0 0 18px 2px color-mix(in srgb,var(--gold) 70%,transparent);transition:transform .55s var(--ease),opacity .3s;opacity:0}
-nav{position:relative}
-nav button svg{transition:transform .45s var(--ease),filter .45s var(--ease),color .3s}
-nav button[aria-current="page"] svg{transform:translateY(-3px);filter:drop-shadow(0 4px 10px color-mix(in srgb,var(--gold) 60%,transparent))}
-.bar{transition:height .2s var(--ease),top .2s var(--ease)}
-.bar:hover{height:6px;top:-4px}
-.bar i{box-shadow:0 0 12px color-mix(in srgb,var(--gold) 80%,transparent);transition:width .25s linear}
-#miniCover{transform:scale(calc(1 + var(--e) * .08));transition:transform .15s linear}
-.row{transition:background-color .25s var(--ease),transform .25s var(--ease)}
-.row:hover{transform:translateX(3px)}
-.cover{box-shadow:inset 0 0 0 1px rgb(255 255 255 / .12),0 6px 18px -8px rgb(0 0 0 / .6)}
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:15px}
+ol.steps b{color:var(--ink)}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);padding:2px 6px;border-radius:6px;color:var(--ink)}
+
+/* lock */
+.lockbox{align-items:center;text-align:center;padding-top:6vh}
+.lockicon{width:72px;height:72px;border-radius:50%;background:var(--raise);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold)}
+.lockicon svg{width:30px;height:30px}
+.lockform{display:flex;gap:10px;width:min(420px,100%)}
+.lockform input{flex:1;min-width:0;border-radius:999px;padding-left:22px}
+.lockform .btn{flex:none}
+
+/* selection bar, mini, dock */
+.selbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px var(--gr) 12px var(--gl);border-bottom:1px solid var(--line);font-weight:800}
+.mini{display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;padding:12px var(--gr) 12px var(--gl);position:relative}
+.bar{position:absolute;left:0;right:0;top:-2px;height:4px;background:rgb(255 255 255 / .08);cursor:pointer}
+.bar i{display:block;height:100%;width:0;background:var(--gold);box-shadow:0 0 12px rgb(242 200 75 / .8)}
+#miniCover{width:56px;height:56px;transform:scale(calc(1 + var(--e) * .08));transition:transform .15s linear}
+.ctrl{display:flex;gap:4px;align-items:center}
+.pp{width:52px;height:52px;border-radius:50%;border:0;background:var(--ink);color:#121118;display:grid;place-items:center;cursor:pointer}
+.pp svg{width:22px;height:22px}
+.time{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:6px}
+@media (max-width:560px){.time{display:none}}
+@media (max-width:440px){#likeNow{display:none}.mini .ib{width:40px;height:40px}.mini{gap:12px}}
+nav{position:relative;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgb(255 255 255 / .06);padding:0 env(safe-area-inset-right,0px) calc(env(safe-area-inset-bottom,0px) + 8px) env(safe-area-inset-left,0px)}
+nav button{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 2px 10px;cursor:pointer;font-size:13px;font-weight:700}
+nav button svg{width:27px;height:27px;transition:transform .45s var(--ease),filter .45s var(--ease)}
+nav button[aria-current="page"]{color:var(--ink)}
+nav button[aria-current="page"] svg{color:var(--gold);transform:translateY(-3px);filter:drop-shadow(0 4px 10px rgb(242 200 75 / .6))}
+.dock-ind{position:absolute;top:0;left:0;width:40px;height:3px;border-radius:0 0 3px 3px;background:var(--gold);box-shadow:0 0 18px 2px rgb(242 200 75 / .7);transition:transform .55s var(--ease);opacity:0}
+
+/* sheet & toast */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .6);z-index:20;display:grid;align-items:end;justify-items:center}
+.sheet{width:min(560px,100%);max-height:88%;overflow-y:auto;background:var(--raise);border-radius:26px 26px 0 0;display:flex;flex-direction:column;gap:14px;
+  padding:22px var(--gr) calc(22px + env(safe-area-inset-bottom,0px)) var(--gl)}
+.sheet label{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.flist{display:flex;flex-direction:column;gap:8px}
+.fopt{text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:16px;padding:14px 16px;cursor:pointer;font-weight:700;font-size:16px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bh) + 16px);background:var(--ink);color:#121118;font-weight:800;padding:12px 18px;border-radius:999px;z-index:30;font-size:15px;max-width:calc(100% - 32px);text-align:center}
+
 @media (prefers-reduced-motion:no-preference){
-  .logo{animation:sweep 2.6s .3s var(--ease) both}
-  @keyframes sweep{from{background-position:100% 0}to{background-position:0 0}}
   .wavetitle span{animation:rise 1s var(--ease) both}
   .wavetitle span:nth-child(2){animation-delay:.12s}
   .wavesub{animation:rise 1s .3s var(--ease) both}
@@ -215,588 +182,602 @@ nav button[aria-current="page"] svg{transform:translateY(-3px);filter:drop-shado
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   .list.enter .row{animation:rowIn .55s var(--ease) both}
   .list.enter .row:nth-child(2){animation-delay:.03s}.list.enter .row:nth-child(3){animation-delay:.06s}.list.enter .row:nth-child(4){animation-delay:.09s}
-  .list.enter .row:nth-child(5){animation-delay:.12s}.list.enter .row:nth-child(6){animation-delay:.15s}.list.enter .row:nth-child(7){animation-delay:.18s}
-  .list.enter .row:nth-child(8){animation-delay:.21s}.list.enter .row:nth-child(9){animation-delay:.24s}.list.enter .row:nth-child(n+10){animation-delay:.27s}
+  .list.enter .row:nth-child(5){animation-delay:.12s}.list.enter .row:nth-child(6){animation-delay:.15s}.list.enter .row:nth-child(n+7){animation-delay:.18s}
   @keyframes rowIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   .scrim{animation:fadeIn .3s var(--ease) both}
   .sheet{animation:sheetUp .5s var(--ease) both}
   @keyframes sheetUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .toast{animation:toastIn .45s var(--ease) both}
   @keyframes toastIn{from{opacity:0;transform:translate(-50%,12px) scale(.96)}to{opacity:1;transform:translate(-50%,0)}}
-  .selbar{animation:viewIn .4s var(--ease) both}
+  .shake{animation:shake .35s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .dock-ind{opacity:1}
 }
-@media (prefers-reduced-motion:reduce){.bigplay,#miniCover{transform:none}.row:hover{transform:none}}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--panel);font-weight:700;padding:10px 16px;border-radius:999px;z-index:30;font-size:13px;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){.bigplay,#miniCover{transform:none}.dock-ind{opacity:1;transition:none}}
 </style>
-
-<div class="app">
-  <header>
-    <div class="logo">СВОИ</div>
-    <div class="who" id="saveState" aria-live="polite"></div>
-  </header>
-
+</head>
+<body>
+<div class="app" id="app">
   <main>
-    <canvas id="wave" aria-hidden="true"></canvas>
+    <div class="wavewrap" aria-hidden="true"><canvas id="wave"></canvas></div>
 
     <section class="view home" id="v-home">
       <div class="center">
         <button class="bigplay" id="wavePlay" aria-label="Включить Мою волну"></button>
         <p class="wavetitle"><span>Моя</span> <span>волна</span></p>
-        <p class="wavesub" id="waveSub">Включится, когда появится музыка</p>
+        <p class="wavesub" id="waveSub">Загружаю музыку…</p>
       </div>
     </section>
 
     <section class="view" id="v-styles" hidden><div class="inner">
-      <div class="toolbar"><h2>Стили</h2><button class="chip selbtn" data-sel="1">Выбрать</button></div>
-      <div class="filters">
-        <span class="lbl">Стили</span><div class="chips" id="styleChips"></div>
-        <div class="manage" id="manage" hidden></div>
-      </div>
+      <div class="toolbar"><h2>Вся музыка</h2><span class="count" id="allCount"></span></div>
+      <div class="chips" id="styleChips"></div>
       <div class="list" id="styleList"></div>
     </div></section>
 
+    <section class="view" id="v-fav" hidden><div class="inner">
+      <div class="toolbar"><h2>Избранное</h2><span class="count" id="favCount"></span></div>
+      <div class="list" id="favList"></div>
+    </div></section>
+
     <section class="view" id="v-lock" hidden><div class="inner lockbox">
-      <div class="lockicon" aria-hidden="true"></div>
-      <h2>Загрузка закрыта паролем</h2>
+      <div class="lockicon" id="lockIcon" aria-hidden="true"></div>
+      <h2>Вход для админа</h2>
+      <p class="hint">Загрузка и управление музыкой</p>
       <form class="lockform" id="lockForm">
-        <input type="password" id="pw" placeholder="Пароль" autocomplete="current-password">
+        <input type="password" id="pw" placeholder="Пароль" autocomplete="current-password" aria-label="Пароль">
         <button class="btn" type="submit">Открыть</button>
       </form>
       <span class="hint" id="pwErr" aria-live="polite"></span>
     </div></section>
 
-    <section class="view" id="v-fav" hidden><div class="inner">
-      <div class="toolbar"><h2>Избранное</h2><div class="chips"><span class="count" id="favCount"></span><button class="chip selbtn" data-sel="1">Выбрать</button></div></div>
-      <div class="list" id="favList"></div>
-    </div></section>
+    <section class="view" id="v-admin" hidden><div class="inner">
+      <div class="toolbar"><h2>Управление музыкой</h2><button class="chip" id="relock">Выйти</button></div>
 
-    <section class="view" id="v-upload" hidden><div class="inner">
-      <div class="toolbar"><h2>Загрузить музыку</h2><button class="chip" id="relock">Закрыть паролем</button></div>
-      <div class="stylepick">
-        <span class="lbl">Стиль загружаемой музыки</span>
-        <div class="chips" id="upStyle"></div>
+      <div class="card" id="tokenCard" hidden>
+        <h2>Подключи GitHub</h2>
+        <p class="hint">Музыка хранится в твоём репозитории <code>nastroy</code>. Чтобы приложение могло туда сохранять, один раз создай ключ доступа:</p>
+        <ol class="steps">
+          <li>Открой <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="color:var(--gold)">github.com → Fine-grained token</a></li>
+          <li><b>Token name</b>: СВОИ, <b>Expiration</b>: максимальный срок</li>
+          <li><b>Repository access</b> → Only select repositories → <b>nastroy</b></li>
+          <li><b>Permissions → Contents</b> → <b>Read and write</b></li>
+          <li>Нажми <b>Generate token</b>, скопируй ключ и вставь ниже</li>
+        </ol>
+        <form class="inline" id="tokenForm"><input type="password" id="tokenInput" placeholder="github_pat_…" autocomplete="off" aria-label="Ключ GitHub"><button class="btn" type="submit">Сохранить</button></form>
+        <span class="hint" id="tokenErr" aria-live="polite"></span>
       </div>
-      <div class="drop" id="drop" tabindex="0" role="button">
-        <strong id="dropTitle">Выбери аудиофайлы</strong>
-        <span>или перетащи их сюда · любое количество · MP3, M4A, WAV, FLAC, OGG</span>
+
+      <div id="adminBody" hidden>
+        <div class="inner" style="gap:18px">
+          <div class="card">
+            <span class="lbl">Стиль загружаемой музыки</span>
+            <div class="chips" id="upStyle"></div>
+            <div class="manage" id="styleManage" hidden></div>
+          </div>
+          <div class="drop" id="drop" tabindex="0" role="button">
+            <strong id="dropTitle">Выбери аудиофайлы</strong>
+            <span>любое количество · MP3, M4A, WAV, FLAC, OGG · до 95 МБ каждый</span>
+          </div>
+          <input type="file" id="upFile" accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.aac" multiple hidden>
+          <div class="prog" id="prog" hidden><span class="count" id="progText"></span><div class="trk"><i id="progFill"></i></div></div>
+          <div class="toolbar"><h2>Все треки</h2><div class="chips"><span class="count" id="admCount"></span><button class="chip" id="selBtn">Выбрать</button></div></div>
+          <p class="hint">Перетаскивай треки за ⋮⋮, чтобы поменять порядок. Изменения сохраняются и через 1–2 минуты появляются у всех слушателей.</p>
+          <div class="list" id="admList"></div>
+          <button class="chip" id="forgetToken" style="align-self:flex-start">Отключить GitHub на этом телефоне</button>
+        </div>
       </div>
-      <input type="file" id="upFile" accept="audio/*" multiple hidden>
-      <div class="prog" id="prog" hidden><span class="count" id="progText"></span><div class="track"><i id="progFill"></i></div></div>
-      <p class="hint">Каждый файл сохраняется автоматически сразу после загрузки и остаётся в плеере после перезапуска. Хранится он в этом браузере на этом устройстве. Порядок меняй, перетаскивая трек за ⋮⋮ слева.</p>
-      <div class="toolbar"><h2>Мои треки</h2><div class="chips"><span class="count" id="upCount"></span><button class="chip selbtn" data-sel="1">Выбрать</button></div></div>
-      <div class="list" id="upList"></div>
     </div></section>
   </main>
 
-  <div class="selbar" id="selBar" hidden>
-    <span id="selText">Выбрано: 0</span>
-    <div class="chips" id="selActs">
-      <button class="chip" id="selAll">Выбрать все</button>
-      <button class="btn ghost" id="selMove">Сменить стиль</button>
-      <button class="btn danger" id="selDel">Удалить</button>
-      <button class="btn ghost" id="selDone">Готово</button>
-    </div>
-    <div class="chips" id="selAsk" hidden>
-      <button class="btn danger" id="selYes">Да, удалить</button>
-      <button class="btn ghost" id="selNo">Отмена</button>
-    </div>
-  </div>
+  <header id="top">
+    <div class="logo">СВОИ<i>.</i></div>
+    <div class="status" id="status" aria-live="polite"></div>
+  </header>
 
-  <div class="mini" id="mini">
-    <div class="bar" id="bar"><i id="barFill"></i></div>
-    <div class="cover" id="miniCover" style="background:var(--line)"></div>
-    <div class="meta"><div class="t1" id="miniT">Ничего не играет</div><div class="t2" id="miniA">Загрузи музыку или включи волну</div></div>
-    <div class="ctrl">
-      <span class="time" id="time">0:00 / 0:00</span>
-      <button class="ib" id="prev" aria-label="Предыдущий трек"></button>
-      <button class="pp" id="pp" aria-label="Играть"></button>
-      <button class="ib" id="next" aria-label="Следующий трек"></button>
-      <button class="ib" id="likeNow" aria-label="В избранное"></button>
+  <div class="bottom" id="bottom">
+    <div class="selbar" id="selBar" hidden>
+      <span id="selText">Выбрано: 0</span>
+      <div class="chips" id="selActs">
+        <button class="chip" id="selAll">Выбрать все</button>
+        <button class="btn ghost" id="selStyle">Сменить стиль</button>
+        <button class="btn danger" id="selDel">Удалить</button>
+        <button class="btn ghost" id="selDone">Готово</button>
+      </div>
+      <div class="chips" id="selAsk" hidden>
+        <button class="btn danger" id="selYes">Да, удалить</button>
+        <button class="btn ghost" id="selNo">Отмена</button>
+      </div>
     </div>
+    <div class="mini">
+      <div class="bar" id="bar"><i id="barFill"></i></div>
+      <div class="cover" id="miniCover" style="background:var(--line)"></div>
+      <div class="meta"><div class="t1" id="miniT">Ничего не играет</div><div class="t2" id="miniA">Включи волну или выбери трек</div></div>
+      <div class="ctrl">
+        <span class="time" id="time">0:00 / 0:00</span>
+        <button class="ib" id="prev" aria-label="Предыдущий трек"></button>
+        <button class="pp" id="pp" aria-label="Играть"></button>
+        <button class="ib" id="next" aria-label="Следующий трек"></button>
+        <button class="ib" id="likeNow" aria-label="В избранное"></button>
+      </div>
+    </div>
+    <nav id="dock" aria-label="Разделы"><span class="dock-ind" id="dockInd" aria-hidden="true"></span>
+      <button data-v="home" aria-current="page"><span data-i="home"></span>Главная</button>
+      <button data-v="styles"><span data-i="note"></span>Стили</button>
+      <button data-v="fav"><span data-i="heart"></span>Избранное</button>
+      <button data-v="admin"><span data-i="up"></span>Загрузить</button>
+    </nav>
   </div>
-
-  <nav id="dock" aria-label="Разделы"><span class="dock-ind" id="dockInd" aria-hidden="true"></span>
-    <button data-v="home" aria-current="page"><span data-i="home"></span>Главная</button>
-    <button data-v="styles"><span data-i="note"></span>Стили</button>
-    <button data-v="fav"><span data-i="heart"></span>Избранное<span class="badge" id="favBadge" hidden></span></button>
-    <button data-v="upload"><span data-i="up"></span>Загрузить</button>
-  </nav>
 </div>
-
-<audio id="audio" preload="metadata"></audio>
+<audio id="audio" preload="metadata" playsinline></audio>
 <script src="sortable.min.js"></script>
-
 <script>
 (() => {
 const $ = id => document.getElementById(id);
+const GH = { owner:"pohnah000-byte", repo:"nastroy", branch:"main", dir:"svoi" };
+const PW_HASH = "da6f0982e74ecb4aacde28b8890034050442f59b5ec9deb60af74d8d062296ee";
+const BASE_STYLES = ["Рэп","Электро"];
+const PALETTE = ["#f2c84b","#e3a24a","#c45a77","#9a5bb0","#6b7be0","#4fb39a"];
+
 const I = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
-  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
   heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.8 4 7.2 4c2 0 3.4 1.1 4.8 2.8C13.4 5.1 14.8 4 16.8 4c3.4 0 5.6 3.3 4.4 6.7C19.5 15.4 12 20 12 20z"/></svg>',
   heartF:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.8 4 7.2 4c2 0 3.4 1.1 4.8 2.8C13.4 5.1 14.8 4 16.8 4c3.4 0 5.6 3.3 4.4 6.7C19.5 15.4 12 20 12 20z"/></svg>',
-  link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>',
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.4-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg>',
   pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>',
   prev:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h2v14H7zM20 6.2v11.6a.8.8 0 0 1-1.2.7L10.5 13a1.2 1.2 0 0 1 0-2l8.3-5.5a.8.8 0 0 1 1.2.7z"/></svg>',
   next:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 5h2v14h-2zM4 6.2v11.6a.8.8 0 0 0 1.2.7l8.3-5.5a1.2 1.2 0 0 0 0-2L5.2 5.5A.8.8 0 0 0 4 6.2z"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
-  clip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L9.7 17.2a1.7 1.7 0 0 1-2.4-2.4L15 7"/></svg>',
-  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2.5h6.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>',
-  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
-  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
-  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>'
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 };
 document.querySelectorAll("[data-i]").forEach(s => s.outerHTML = I[s.dataset.i]);
-$("wavePlay").innerHTML = I.play; $("pp").innerHTML = I.play; $("prev").innerHTML = I.prev; $("next").innerHTML = I.next; $("likeNow").innerHTML = I.heart;
+$("wavePlay").innerHTML = I.play; $("pp").innerHTML = I.play; $("prev").innerHTML = I.prev; $("next").innerHTML = I.next; $("likeNow").innerHTML = I.heart; $("lockIcon").innerHTML = I.lock;
 
-const STYLES = ["Рэп","Электро"];
-let customStyles = [], upStyleSel = "";
-const allStyles = () => [...STYLES, ...customStyles];
-const normStyle = x => x === "Электроника" ? "Электро" : allStyles().includes(x) ? x : "";
-const PALETTE = ["#f2c84b","#e3a24a","#b8546e","#8a4f9e","#5b6bd6","#4fb39a"];
-
-// ---------- storage ----------
-let tracks = [], favs = new Set(), blobs = new Map(), db = null, dbTried = false;
-const LS = "svoi-v1";
-let folders = [], upFolderSel = "", openFolder = null;
-function save(){ try{ localStorage.setItem(LS, JSON.stringify({tracks, favs:[...favs], customStyles, upStyleSel, folders, upFolderSel})); }catch{} }
-function load(){ try{ const s = JSON.parse(localStorage.getItem(LS)||"null"); if(s){ customStyles = (s.customStyles||[]).filter(x => typeof x === "string" && x && !STYLES.includes(x)); tracks = s.tracks||[]; favs = new Set(s.favs||[]); upStyleSel = normStyle(s.upStyleSel||""); tracks.forEach(t => t.style = normStyle(t.style||"")); folders = s.folders||[]; upFolderSel = folders.some(f=>f.id===s.upFolderSel) ? s.upFolderSel : ""; } }catch{} }
-function openDB(){ return new Promise(res => { try{ const r = indexedDB.open("svoi-audio",1); r.onupgradeneeded = () => r.result.createObjectStore("f"); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }catch{ res(null); } }); }
-function idb(mode, fn){ return new Promise(res => { if(!db) return res(null); try{ const tx = db.transaction("f", mode); const st = tx.objectStore("f"); const r = fn(st); tx.oncomplete = () => res(r && r.result); tx.onerror = () => res(null); }catch{ res(null); } }); }
-const putBlob = (id, b) => idb("readwrite", s => s.put(b, id));
-const getBlob = id => idb("readonly", s => s.get(id));
-const delBlob = id => idb("readwrite", s => s.delete(id));
-
-const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+// ---------- helpers ----------
+const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); }catch{ return d; } }, set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} } };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const colorOf = s => PALETTE[[...String(s)].reduce((a,c)=>a+c.charCodeAt(0),0) % PALETTE.length];
-const hasSound = t => blobs.has(t.id);
-
-function toast(msg){ const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(()=>t.remove(), 2200); }
-
-// ---------- rows ----------
-let selecting = false; const picked = new Set();
-const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-function rowHTML(t){
-  if(selecting) return `<div class="row ${picked.has(t.id)?"picked":""}" data-id="${t.id}" tabindex="0" role="checkbox" aria-checked="${picked.has(t.id)}">
-    <span class="check">${picked.has(t.id)?CHECK:""}</span>
-    <div class="cover" style="background:${colorOf(t.artist||t.title)}">${esc((t.artist||t.title||"?").trim()[0]||"?").toUpperCase()}</div>
-    <div class="meta"><div class="t1">${esc(t.title)}</div><div class="t2">${esc(t.artist||"Неизвестный исполнитель")}${t.style?" · "+esc(t.style):""}</div></div>
-    <span></span></div>`;
-  if(askDel === t.id) return `<div class="row" data-id="${t.id}">
-    <span class="grip"></span><div class="cover" style="background:var(--line)"></div>
-    <div class="meta"><div class="t1">${esc(t.title)}</div><div class="t2">${hasSound(t)?"Трек и его файл будут удалены":"Трек будет удалён из списка"}</div></div>
-    <div class="ask"><button class="yes" data-a="delyes">Удалить</button><button class="no" data-a="delno">Отмена</button></div></div>`;
-  return `<div class="row ${cur && cur.id===t.id ? "playing":""}" data-id="${t.id}" tabindex="0">
-    <span class="grip" aria-label="Перетащить">${I.grip}</span>
-    <div class="cover" style="background:${colorOf(t.artist||t.title)}">${esc((t.artist||t.title||"?").trim()[0]||"?").toUpperCase()}</div>
-    <div class="meta"><div class="t1">${esc(t.title)}${hasSound(t)?"":'<span class="nosound">без звука</span>'}</div>
-      <div class="t2">${esc(t.artist||"Неизвестный исполнитель")}${t.style?" · "+esc(t.style):""}</div></div>
-    <div class="acts">
-      ${hasSound(t)?"":`<button class="ib" data-a="attach" aria-label="Прикрепить звук">${I.clip}</button>`}
-      <button class="ib ${favs.has(t.id)?"on":""}" data-a="fav" aria-label="Избранное">${favs.has(t.id)?I.heartF:I.heart}</button>
-      <button class="ib" data-a="edit" aria-label="Изменить">${I.edit}</button>
-      <button class="ib" data-a="del" aria-label="Удалить">${I.del}</button>
-    </div></div>`;
-}
-let askDel = null;
-async function removeTrack(t, quiet){
-  if(cur && cur.id === t.id){ audio.pause(); audio.removeAttribute("src"); cur = null; $("miniT").textContent = "Ничего не играет"; $("miniA").textContent = "Загрузи музыку или включи волну"; }
-  queue = queue.filter(x => x.id !== t.id);
-  tracks = tracks.filter(z => z.id !== t.id); favs.delete(t.id); blobs.delete(t.id);
-  await delBlob(t.id); if(!quiet){ save(); renderAll(); toast("Удалено"); }
-}
-const LIST_OF = {styles:"styleList", fav:"favList", upload:"upList"};
-function setSelecting(on){
-  selecting = on; picked.clear(); askDel = null;
-  $("selBar").hidden = !on; $("selAsk").hidden = true; $("selActs").hidden = false;
-  document.querySelector(".app").classList.toggle("selecting", on);
-  document.querySelectorAll(".selbtn").forEach(b => b.textContent = on ? "Отменить выбор" : "Выбрать");
-  renderAll();
-}
-document.addEventListener("click", e => { if(e.target.closest(".selbtn")) setSelecting(!selecting); });
-$("selDone").onclick = () => setSelecting(false);
-$("selAll").onclick = () => {
-  const list = $(LIST_OF[view])?._list || [];
-  const all = list.length && list.every(t => picked.has(t.id));
-  list.forEach(t => all ? picked.delete(t.id) : picked.add(t.id)); renderAll();
-};
-$("selDel").onclick = () => { if(!picked.size) return; $("selActs").hidden = true; $("selAsk").hidden = false; $("selYes").textContent = `Да, удалить ${picked.size}`; };
-$("selNo").onclick = () => { $("selAsk").hidden = true; $("selActs").hidden = false; };
-$("selYes").onclick = async () => {
-  const ids = [...picked]; const n = ids.length;
-  for(const id of ids){ const t = tracks.find(x => x.id === id); if(t) await removeTrack(t, true); }
-  save(); setSelecting(false); toast(`Удалено: ${n} ${plural(n,"трек","трека","треков")}`);
-};
-// drag-to-reorder: the visible subset keeps its slots in the full list
-function applyOrder(el){
-  const ids = [...el.querySelectorAll(".row[data-id]")].map(r => r.dataset.id);
-  const set = new Set(ids);
-  const slots = []; tracks.forEach((t,i) => { if(set.has(t.id)) slots.push(i); });
-  const byId = new Map(tracks.map(t => [t.id, t]));
-  const next = tracks.slice();
-  slots.forEach((slot, k) => { next[slot] = byId.get(ids[k]); });
-  tracks = next; save();
-  if(cur){ queue = tracks.filter(hasSound); qi = queue.findIndex(x => x.id === cur.id); }
-  toast("Порядок сохранён");
-}
-function renderList(el, list, emptyHTML){ el.innerHTML = list.length ? list.map(rowHTML).join("") : `<div class="empty">${emptyHTML}</div>`; el._list = list; }
-
-function bindList(el){
-  el.addEventListener("click", e => {
-    const row = e.target.closest(".row"); if(!row) return;
-    const t = tracks.find(x => x.id === row.dataset.id); if(!t) return;
-    if(selecting){ picked.has(t.id) ? picked.delete(t.id) : picked.add(t.id); $("selAsk").hidden = true; $("selActs").hidden = false; renderAll(); return; }
-    const a = e.target.closest("[data-a]")?.dataset.a;
-    if(a === "fav"){ favs.has(t.id) ? favs.delete(t.id) : favs.add(t.id); save(); renderAll(); return; }
-    if(a === "edit"){ openEdit(t); return; }
-    if(a === "del"){ askDel = t.id; renderAll(); return; }
-    if(a === "delno"){ askDel = null; renderAll(); return; }
-    if(a === "delyes"){ askDel = null; removeTrack(t); return; }
-    if(askDel || e.target.closest(".grip")) return;
-    if(a === "attach"){ attachFor = t; $("upFile").multiple = false; $("upFile").click(); return; }
-    if(e.target.closest("[data-go]")) return;
-    playFrom(el._list, t);
-  });
-  el.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.classList.contains("row")) e.target.click(); });
-  el.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if(g) go(g.dataset.go); });
-}
-["styleList","favList","upList"].forEach(id => bindList($(id)));
-if(window.Sortable) ["styleList","favList","upList"].forEach(id => {
-  Sortable.create($(id), { handle:".grip", draggable:".row", animation:160, delay:0, forceFallback:true, fallbackTolerance:4,
-    onEnd: e => { if(e.oldIndex !== e.newIndex) applyOrder(e.to); } });
-}); else ["styleList","favList","upList"].forEach(id => $(id).classList.add("nogrip"));
-
-// ---------- views ----------
-let view = "home", yearSel = "all", styleSel = "all", lastView = null;
-function moveDockInd(){
-  const b = document.querySelector("#dock button[aria-current]"), ind = $("dockInd"); if(!b) return;
-  const nb = $("dock").getBoundingClientRect(), r = b.getBoundingClientRect();
-  ind.style.transform = `translateX(${r.left - nb.left + r.width/2 - 17}px)`; ind.style.opacity = 1;
-}
-addEventListener("resize", () => moveDockInd());
-function go(v){
-  if(selecting && v !== view){ selecting = false; picked.clear(); $("selBar").hidden = true; document.querySelector(".app").classList.remove("selecting"); document.querySelectorAll(".selbtn").forEach(b => b.textContent = "Выбрать"); }
-  view = v;
-  if(v !== "folders") openFolder = null;
-  const shown = v === "upload" && !unlocked ? "lock" : v;
-  document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-"+shown);
-  if(shown === "lock") setTimeout(() => $("pw").focus(), 30);
-  if(v !== lastView){ const el = $("v-"+shown); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); lastView = v; setTimeout(() => animateList(LIST_OF[v]), 0); }
-  requestAnimationFrame(moveDockInd);
-  document.querySelectorAll("#dock button").forEach(b => b.dataset.v === v ? b.setAttribute("aria-current","page") : b.removeAttribute("aria-current"));
-  try{ localStorage.setItem(LS+"-tab", v); }catch{}
-  renderAll();
-}
-$("dock").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if(b) go(b.dataset.v); });
-
-function renderAll(){
-  const playable = tracks.filter(hasSound);
-  const ss = $("saveState");
-  ss.innerHTML = (dbTried && !db) ? '<span class="dot warn"></span>Сохранение недоступно в этом окне'
-    : playable.length ? `<span class="dot"></span>Сохранено · ${playable.length} ${plural(playable.length,"трек","трека","треков")}` : "";
-  $("waveSub").textContent = playable.length ? `${playable.length} ${plural(playable.length,"трек","трека","треков")} в волне · нажми, чтобы включить` : "Включится, когда появится музыка";
-  if(selecting){ $("selText").textContent = `Выбрано: ${picked.size}`; $("selDel").disabled = !picked.size; $("selMove").disabled = !picked.size;
-    const list = $(LIST_OF[view])?._list || []; $("selAll").textContent = list.length && list.every(t=>picked.has(t.id)) ? "Снять все" : "Выбрать все"; }
-  const fb = $("favBadge"); fb.hidden = !favs.size; fb.textContent = favs.size;
-  if(view === "styles"){
-    if(styleSel.startsWith("f:")) styleSel = "all";
-    if(styleSel.startsWith("s:") && styleSel.length > 2 && !allStyles().includes(styleSel.slice(2))) styleSel = "all";
-    const pr = v => `aria-pressed="${styleSel===v}"`;
-    $("styleChips").innerHTML = [`<button class="chip" data-s="all" ${pr("all")}>Все</button>`,
-      ...allStyles().map(x => `<button class="chip" data-s="s:${esc(x)}" ${pr("s:"+x)}>${esc(x)}</button>`),
-      `<button class="chip" data-s="s:" ${pr("s:")}>Без стиля</button>`,
-      `<button class="chip add" data-add="style">+ Свой стиль</button>`].join("");
-    const m = $("manage"); const isCustom = styleSel.startsWith("s:") && customStyles.includes(styleSel.slice(2)); const isFolder = styleSel.startsWith("f:") && styleSel.length > 2;
-    if((isCustom || isFolder) && !m.dataset.ask){ m.hidden = false; m.innerHTML = `<span class="hint">${isFolder ? "Папка" : "Стиль"} «${esc(isFolder ? folderName(styleSel.slice(2)) : styleSel.slice(2))}»</span><button class="chip" data-m="rename">Переименовать</button><button class="chip" data-m="del">Удалить</button>`; }
-    else if(!isCustom && !isFolder){ m.hidden = true; m.innerHTML = ""; delete m.dataset.ask; }
-    const list = tracks.filter(t => styleSel === "all" ? true
-      : styleSel.startsWith("s:") ? (t.style||"") === styleSel.slice(2)
-      : (t.folder||"") === styleSel.slice(2));
-    renderList($("styleList"), list, !tracks.length ? "Здесь появятся твои треки, разложенные по стилям и папкам."
-      : styleSel.startsWith("f:") ? "В папке пока пусто. Перенеси сюда треки: «Выбрать» → «В папку» или ✎ у трека."
-      : "В этом стиле пока ничего. Стиль меняется у трека кнопкой ✎.");
-  }
-  if(view === "fav"){
-    const list = tracks.filter(t => favs.has(t.id));
-    $("favCount").textContent = list.length ? list.length + " " + plural(list.length,"трек","трека","треков") : "";
-    renderList($("favList"), list, "Нажми ♡ у любого трека, и он появится здесь.");
-  }
-  if(view === "upload"){
-    const list = tracks.filter(hasSound);
-    $("upCount").textContent = list.length ? list.length + " " + plural(list.length,"файл","файла","файлов") : "";
-    renderList($("upList"), list, "Здесь появятся загруженные файлы.");
-    $("upStyle").innerHTML = [`<button class="chip" data-u="" aria-pressed="${upStyleSel===""}">Без стиля</button>`,
-      ...allStyles().map(x => `<button class="chip" data-u="${esc(x)}" aria-pressed="${upStyleSel===x}">${esc(x)}</button>`),
-      `<button class="chip add" data-u-add="1">+ Свой стиль</button>`].join("");
-    const bits = [upStyleSel && `стиль «${upStyleSel}»`].filter(Boolean);
-    $("dropTitle").textContent = bits.length ? `Выбери аудиофайлы · ${bits.join(" · ")}` : "Выбери аудиофайлы";
-  }
-}
-$("upStyle").addEventListener("click", e => {
-  if(e.target.closest("[data-u-add]")){ askName("Свой стиль", "", "Например, «Для зала»", name => { if(!allStyles().includes(name)) customStyles.push(name); upStyleSel = name; save(); renderAll(); }); return; }
-  const c = e.target.closest("[data-u]"); if(c){ upStyleSel = c.dataset.u; save(); renderAll(); }
-});
-function onFilterClick(e){
-  const add = e.target.closest("[data-add]")?.dataset.add;
-  if(add === "style"){ askName("Свой стиль", "", "Например, «Для зала»", name => { if(allStyles().includes(name)){ toast("Такой стиль уже есть"); return; } customStyles.push(name); styleSel = "s:"+name; save(); renderAll(); animateList("styleList"); toast(`Стиль «${name}» добавлен`); }); return; }
-  if(add === "folder"){ askName("Своя папка", "", "Название папки", name => { const f = makeFolder(name); styleSel = "f:"+f.id; renderAll(); animateList("styleList"); }); return; }
-  const c = e.target.closest("[data-s]"); if(c){ styleSel = c.dataset.s; delete $("manage").dataset.ask; renderAll(); animateList("styleList"); }
-}
-$("styleChips").addEventListener("click", onFilterClick);
-$("manage").addEventListener("click", e => {
-  const m = $("manage"), a = e.target.closest("[data-m]")?.dataset.m; if(!a) return;
-  const isFolder = styleSel.startsWith("f:"), key = styleSel.slice(2);
-  if(a === "rename"){
-    if(isFolder){ const f = folders.find(x => x.id === key); if(f) askName("Переименовать папку", f.name, "Название папки", name => { f.name = name; save(); renderAll(); }); }
-    else askName("Переименовать стиль", key, "Название стиля", name => { if(name !== key && allStyles().includes(name)){ toast("Такой стиль уже есть"); return; } customStyles = customStyles.map(x => x === key ? name : x); tracks.forEach(t => { if(t.style === key) t.style = name; }); if(upStyleSel === key) upStyleSel = name; styleSel = "s:"+name; save(); renderAll(); });
-    return;
-  }
-  if(a === "del"){
-    const cnt = tracks.filter(t => isFolder ? t.folder === key : t.style === key).length;
-    m.dataset.ask = "1";
-    m.innerHTML = `<span class="hint">${cnt ? `Треки (${cnt}) останутся и попадут в «${isFolder ? "Без папки" : "Без стиля"}».` : (isFolder ? "Папка пустая." : "В этом стиле нет треков.")}</span><button class="btn danger" data-m="yes">Удалить ${isFolder ? "папку" : "стиль"}</button><button class="btn ghost" data-m="no">Отмена</button>`;
-    return;
-  }
-  if(a === "no"){ delete m.dataset.ask; renderAll(); return; }
-  if(a === "yes"){
-    delete m.dataset.ask;
-    if(isFolder){ tracks.forEach(t => { if(t.folder === key) t.folder = ""; }); folders = folders.filter(f => f.id !== key); if(upFolderSel === key) upFolderSel = ""; toast("Папка удалена"); }
-    else { tracks.forEach(t => { if(t.style === key) t.style = ""; }); customStyles = customStyles.filter(x => x !== key); if(upStyleSel === key) upStyleSel = ""; toast("Стиль удалён"); }
-    styleSel = "all"; save(); renderAll();
-  }
-});
-function animateList(id){ const el = $(id); if(!el) return; el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("enter"), 900); }
 const plural = (n,a,b,c) => { const m = n%100, k = n%10; return m>10&&m<20 ? c : k===1 ? a : k>=2&&k<=4 ? b : c; };
-
-// ---------- upload ----------
-let attachFor = null;
-const drop = $("drop");
-drop.onclick = () => { attachFor = null; $("upFile").multiple = true; $("upFile").click(); };
-drop.onkeydown = e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); drop.click(); } };
-["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("on"); }));
-["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("on"); }));
-drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
-$("upFile").onchange = () => { addFiles($("upFile").files); $("upFile").value = ""; };
-let busy = false;
-const asBlob = async f => { try{ return new Blob([await f.arrayBuffer()], {type: f.type || "audio/mpeg"}); }catch{ return f; } };
-async function addFiles(files){
-  let list = [...files].filter(f => f.type.startsWith("audio/") || /\.(mp3|m4a|wav|flac|ogg|aac|opus)$/i.test(f.name));
-  if(!list.length){ toast("Это не аудиофайлы"); return; }
-  try{ navigator.storage?.persist?.(); }catch{}
-  if(attachFor){
-    const b = await asBlob(list[0]); blobs.set(attachFor.id, b); await putBlob(attachFor.id, b);
-    toast("Звук прикреплён и сохранён: " + attachFor.title); attachFor = null; save(); renderAll(); return;
-  }
-  if(busy){ toast("Дождись окончания текущей загрузки"); return; }
-  busy = true; $("prog").hidden = false;
-  let ok = 0, fail = 0;
-  for(let i = 0; i < list.length; i++){
-    const f = list[i];
-    $("progText").textContent = `Сохраняю ${i+1} из ${list.length}: ${f.name}`;
-    $("progFill").style.width = (i / list.length * 100) + "%";
-    const base = f.name.replace(/\.[^.]+$/,"").replace(/_/g," ");
-    const m = base.match(/^(.+?)\s+[—–-]\s+(.+)$/);
-    const t = {id:uid(), title:m?m[2].trim():base.trim(), artist:m?m[1].trim():"", year:null, style:upStyleSel, folder:""};
-    const b = await asBlob(f);
-    blobs.set(t.id, b); tracks.push(t);
-    const stored = await putBlob(t.id, b);
-    if(db && stored === null) fail++; else ok++;
-    save();
-    if(i % 5 === 4) renderAll();
-  }
-  $("progFill").style.width = "100%";
-  $("progText").textContent = `Готово: ${ok} ${plural(ok,"файл","файла","файлов")} сохранено` + (fail ? `, ${fail} не поместились в память браузера` : "") + (upStyleSel ? ` · стиль «${upStyleSel}»` : "");
-  busy = false; renderAll();
-  toast(`Загружено и сохранено: ${ok}`);
-}
-
-// ---------- folders ----------
-const folderName = id => folders.find(f => f.id === id)?.name || "";
-function makeFolder(name){ const f = {id:"f"+uid(), name}; folders.push(f); save(); toast(`Папка «${name}» создана`); return f; }
+const tracksWord = n => `${n} ${plural(n,"трек","трека","треков")}`;
+function toast(msg){ document.querySelectorAll(".toast").forEach(t => t.remove()); const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), 2600); }
 function sheet(html){ const s = document.createElement("div"); s.className = "scrim"; s.innerHTML = `<div class="sheet">${html}</div>`; document.body.append(s); s.addEventListener("click", e => { if(e.target === s) s.remove(); }); return s; }
 function askName(title, value, placeholder, done){
   const s = sheet(`<h2>${esc(title)}</h2><form class="inline" id="fnForm"><input type="text" id="fnInput" maxlength="40" placeholder="${esc(placeholder)}" value="${esc(value)}"><button class="btn" type="submit">Готово</button></form><button class="btn ghost" type="button" id="fnCancel">Отмена</button>`);
-  const inp = s.querySelector("#fnInput"); setTimeout(() => { inp.focus(); inp.select(); }, 60);
+  const inp = s.querySelector("#fnInput"); setTimeout(() => inp.focus(), 60);
   s.querySelector("#fnCancel").onclick = () => s.remove();
   s.querySelector("#fnForm").onsubmit = e => { e.preventDefault(); const v = inp.value.trim(); if(!v){ inp.focus(); return; } s.remove(); done(v); };
 }
-function askFolderName(title, value, done){
-  const s = sheet(`<h2>${esc(title)}</h2><form class="inline" id="fnForm"><input type="text" id="fnInput" maxlength="40" placeholder="Название папки" value="${esc(value)}"><button class="btn" type="submit">Готово</button></form><button class="btn ghost" type="button" id="fnCancel">Отмена</button>`);
-  const inp = s.querySelector("#fnInput"); inp.focus(); inp.select();
-  s.querySelector("#fnCancel").onclick = () => s.remove();
-  s.querySelector("#fnForm").onsubmit = e => { e.preventDefault(); const v = inp.value.trim(); if(!v){ inp.focus(); return; } s.remove(); done(v); };
-}
-function moveTo(ids, folderId){
-  ids.forEach(id => { const t = tracks.find(x => x.id === id); if(t) t.folder = folderId; });
-  save(); toast(`Перемещено в «${folderId ? folderName(folderId) : "Без папки"}»: ${ids.length}`);
-}
-function chooseFolder(ids, after){
-  const s = sheet(`<h2>Переместить ${ids.length} ${plural(ids.length,"трек","трека","треков")}</h2>
-    <div class="flist">
-      <button class="fopt" data-f="">Без папки</button>
-      ${folders.map(f => `<button class="fopt" data-f="${f.id}">${esc(f.name)}</button>`).join("")}
-    </div>
-    <form class="inline" id="mvNew"><input type="text" id="mvName" maxlength="40" placeholder="Или новая папка"><button class="btn" type="submit">Создать и переместить</button></form>
-    <button class="btn ghost" type="button" id="mvCancel">Отмена</button>`);
-  s.querySelector("#mvCancel").onclick = () => s.remove();
-  s.querySelector(".flist").onclick = e => { const b = e.target.closest("[data-f]"); if(!b) return; s.remove(); moveTo(ids, b.dataset.f); after(); };
-  s.querySelector("#mvNew").onsubmit = e => { e.preventDefault(); const v = s.querySelector("#mvName").value.trim(); if(!v) return; const f = makeFolder(v); s.remove(); moveTo(ids, f.id); after(); };
-}
-function chooseStyle(ids, after){
-  const s = sheet(`<h2>Стиль для ${ids.length} ${plural(ids.length,"трека","треков","треков")}</h2>
-    <div class="flist">
-      ${allStyles().map(x => `<button class="fopt" data-st="${esc(x)}">${esc(x)}</button>`).join("")}
-      <button class="fopt" data-st="">Без стиля</button>
-    </div>
-    <form class="inline" id="stNew"><input type="text" id="stName" maxlength="40" placeholder="Или новый стиль"><button class="btn" type="submit">Создать и применить</button></form>
-    <button class="btn ghost" type="button" id="stCancel">Отмена</button>`);
-  const apply = st => { ids.forEach(id => { const t = tracks.find(x => x.id === id); if(t) t.style = st; }); save(); s.remove(); toast(`«${st || "Без стиля"}»: ${ids.length} ${plural(ids.length,"трек","трека","треков")}`); after(); };
-  s.querySelector("#stCancel").onclick = () => s.remove();
-  s.querySelector(".flist").onclick = e => { const b = e.target.closest("[data-st]"); if(b) apply(b.dataset.st); };
-  s.querySelector("#stNew").onsubmit = e => { e.preventDefault(); const v = s.querySelector("#stName").value.trim(); if(!v) return; if(!allStyles().includes(v)) customStyles.push(v); apply(v); };
-}
-$("selMove").onclick = () => { if(!picked.size) return; chooseStyle([...picked], () => setSelecting(false)); };
+// measure glass bars so content never hides under them
+function measure(){ const r = document.documentElement.style; r.setProperty("--hh", $("top").offsetHeight + "px"); r.setProperty("--bh", $("bottom").offsetHeight + "px"); }
+new ResizeObserver(measure).observe($("top")); new ResizeObserver(measure).observe($("bottom"));
 
-// ---------- password lock for «Загрузить» ----------
-const PW_HASH = "da6f0982e74ecb4aacde28b8890034050442f59b5ec9deb60af74d8d062296ee";
+// ---------- state ----------
+let catalog = { styles:[...BASE_STYLES], tracks:[], rev:0 };
+let favs = new Set(store.get("svoi-favs", []));
+let token = store.get("svoi-gh-token", "");
 let unlocked = false; try{ unlocked = sessionStorage.getItem("svoi-open") === PW_HASH; }catch{}
+const pending = new Map();           // id -> File, plays before GitHub Pages finishes publishing
+let view = "home", lastView = null, styleSel = "all", upStyleSel = store.get("svoi-upstyle", "");
+let selecting = false; const picked = new Set();
+const allStyles = () => { const s = [...BASE_STYLES]; (catalog.styles||[]).forEach(x => { if(x && !s.includes(x)) s.push(x); }); return s; };
+const saveFavs = () => store.set("svoi-favs", [...favs]);
+
+function setStatus(html){ $("status").innerHTML = html; }
+
+// ---------- catalog (public, read by everyone) ----------
+async function loadCatalog(quiet){
+  try{
+    const r = await fetch("tracks.json?t=" + Date.now(), {cache:"no-store"});
+    if(r.status === 404){ catalog = { styles:[...BASE_STYLES], tracks:[], rev:0 }; }
+    else if(r.ok){ const j = await r.json(); if(!quiet || (j.rev||0) >= (catalog.rev||0)) catalog = normalize(j); }
+    else throw 0;
+    store.set("svoi-cat", catalog);
+  }catch{ const c = store.get("svoi-cat", null); if(c) catalog = normalize(c); }
+  renderAll();
+}
+function normalize(j){ return { styles: Array.isArray(j.styles) ? j.styles : [...BASE_STYLES], tracks: Array.isArray(j.tracks) ? j.tracks.filter(t => t && t.id && t.file) : [], rev: j.rev||0 }; }
+document.addEventListener("visibilitychange", () => { if(!document.hidden && !busy) loadCatalog(true); });
+
+// ---------- GitHub write API (admin only) ----------
+async function gh(path, opts = {}){
+  const r = await fetch("https://api.github.com/repos/" + GH.owner + "/" + GH.repo + path, { ...opts,
+    headers: { "Authorization": "Bearer " + token, "Accept": opts.accept || "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? {"Content-Type":"application/json"} : {}) } });
+  if(!r.ok){ const e = new Error("gh " + r.status); e.status = r.status; try{ e.detail = (await r.json()).message; }catch{} throw e; }
+  return opts.raw ? r.text() : r.status === 204 ? null : r.json();
+}
+async function freshCatalog(){
+  try{ const txt = await gh(`/contents/${GH.dir}/tracks.json?ref=${GH.branch}`, {accept:"application/vnd.github.raw+json", raw:true}); return normalize(JSON.parse(txt)); }
+  catch(e){ if(e.status === 404) return { styles:[...BASE_STYLES], tracks:[], rev:0 }; throw e; }
+}
+function fileToB64(f){ return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(",")[1] || ""); fr.onerror = () => rej(fr.error); fr.readAsDataURL(f); }); }
+let busy = false;
+// one commit: optional new audio files + catalog mutation (+ deleted paths)
+async function commit(message, mutate, files = [], onBlob){
+  for(let attempt = 0; attempt < 2; attempt++){
+    const ref = await gh(`/git/ref/heads/${GH.branch}`);
+    const head = await gh(`/git/commits/${ref.object.sha}`);
+    const cat = await freshCatalog();
+    const entries = [];
+    for(let i = 0; i < files.length; i++){
+      const f = files[i];
+      if(!f.sha){ const b = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: await fileToB64(f.blob), encoding:"base64"})}); f.sha = b.sha; }
+      entries.push({path:`${GH.dir}/${f.path}`, mode:"100644", type:"blob", sha:f.sha});
+      onBlob && onBlob(i + 1);
+    }
+    const removed = mutate(cat) || [];
+    cat.rev = Date.now();
+    removed.forEach(p => entries.push({path:`${GH.dir}/${p}`, mode:"100644", type:"blob", sha:null}));
+    entries.push({path:`${GH.dir}/tracks.json`, mode:"100644", type:"blob", content: JSON.stringify(cat, null, 1)});
+    const tree = await gh(`/git/trees`, {method:"POST", body: JSON.stringify({base_tree: head.tree.sha, tree: entries})});
+    const c = await gh(`/git/commits`, {method:"POST", body: JSON.stringify({message, tree: tree.sha, parents:[ref.object.sha]})});
+    try{ await gh(`/git/refs/heads/${GH.branch}`, {method:"PATCH", body: JSON.stringify({sha: c.sha})}); }
+    catch(e){ if(e.status === 422 && attempt === 0) continue; throw e; }
+    catalog = cat; store.set("svoi-cat", catalog); renderAll(); watchDeploy(cat.rev);
+    return;
+  }
+}
+let deployTimer = null;
+function watchDeploy(rev){
+  setStatus('<span class="dot warn"></span>Публикуется для всех…');
+  clearInterval(deployTimer); let n = 0;
+  deployTimer = setInterval(async () => {
+    n++;
+    try{ const r = await fetch("tracks.json?t=" + Date.now(), {cache:"no-store"}); if(r.ok){ const j = await r.json(); if((j.rev||0) >= rev){ clearInterval(deployTimer); setStatus('<span class="dot"></span>Опубликовано'); toast("Опубликовано, слушатели уже видят изменения"); setTimeout(() => setStatus(""), 6000); } } }catch{}
+    if(n > 40){ clearInterval(deployTimer); setStatus('<span class="dot warn"></span>GitHub публикует дольше обычного'); }
+  }, 8000);
+}
+function ghError(e){
+  if(e.status === 401) return "Ключ GitHub не подходит или истёк. Создай новый.";
+  if(e.status === 403 || e.status === 404) return "У ключа нет доступа к репозиторию nastroy (нужно Contents: Read and write).";
+  if(e.status === 413 || e.status === 422) return "GitHub не принял файл. Возможно, он слишком большой.";
+  if(!navigator.onLine) return "Нет интернета.";
+  return "GitHub не ответил. Попробуй ещё раз.";
+}
+async function run(label, fn){
+  if(busy){ toast("Дождись окончания предыдущего действия"); return false; }
+  busy = true; setStatus(`<span class="dot warn"></span>${esc(label)}…`);
+  try{ await fn(); return true; }
+  catch(e){ console.error(e); setStatus('<span class="dot warn"></span>Не сохранилось'); toast(ghError(e)); return false; }
+  finally{ busy = false; }
+}
+
+// ---------- rows ----------
+function coverHTML(t, id){ const ch = (t.artist||t.title||"?").trim()[0]?.toUpperCase() || "?"; return `<div class="cover" ${id?`id="${id}"`:""} style="background:${colorOf(t.artist||t.title)}">${esc(ch)}</div>`; }
+function rowUser(t){
+  return `<div class="row ${cur && cur.id===t.id ? "playing":""}" data-id="${t.id}" tabindex="0">
+    ${coverHTML(t)}
+    <div class="meta"><div class="t1">${esc(t.title)}</div><div class="t2">${esc(t.artist||"Неизвестный исполнитель")}${t.style?" · "+esc(t.style):""}</div></div>
+    <div class="acts"><button class="ib ${favs.has(t.id)?"on":""}" data-a="fav" aria-label="${favs.has(t.id)?"Убрать из избранного":"В избранное"}">${favs.has(t.id)?I.heartF:I.heart}</button></div></div>`;
+}
+let askDel = null;
+function rowAdmin(t){
+  if(askDel === t.id) return `<div class="row adm" data-id="${t.id}"><span></span>${coverHTML(t)}
+    <div class="meta"><div class="t1">${esc(t.title)}</div><div class="t2">Удалить у всех слушателей?</div></div>
+    <div class="acts"><button class="btn danger" data-a="delyes" style="min-height:40px;padding:8px 14px">Удалить</button><button class="ib" data-a="delno" aria-label="Отмена">✕</button></div></div>`;
+  return `<div class="row adm ${selecting && picked.has(t.id) ? "picked":""} ${cur && cur.id===t.id ? "playing":""}" data-id="${t.id}" tabindex="0">
+    ${selecting ? `<span class="check">${picked.has(t.id)?I.check:""}</span>` : `<span class="grip" aria-label="Перетащить">${I.grip}</span>`}
+    ${coverHTML(t)}
+    <div class="meta"><div class="t1">${esc(t.title)}${pending.has(t.id)?'<span class="tag">публикуется</span>':""}</div><div class="t2">${esc(t.artist||"Неизвестный исполнитель")} · ${esc(t.style||"Без стиля")}</div></div>
+    ${selecting ? "<span></span>" : `<div class="acts"><button class="ib" data-a="edit" aria-label="Изменить">${I.edit}</button><button class="ib" data-a="del" aria-label="Удалить">${I.del}</button></div>`}</div>`;
+}
+function renderList(el, list, empty, row){ el.innerHTML = list.length ? list.map(row).join("") : `<div class="empty">${empty}</div>`; el._list = list; }
+function animateList(id){ const el = $(id); if(!el) return; el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("enter"), 900); }
+
+function bindUserList(el){
+  el.addEventListener("click", e => {
+    const row = e.target.closest(".row"); if(!row) return;
+    const t = catalog.tracks.find(x => x.id === row.dataset.id); if(!t) return;
+    if(e.target.closest("[data-a=fav]")){ toggleFav(t.id); return; }
+    playFrom(el._list, t);
+  });
+  el.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.classList.contains("row")) e.target.click(); });
+}
+bindUserList($("styleList")); bindUserList($("favList"));
+function toggleFav(id){ favs.has(id) ? favs.delete(id) : favs.add(id); saveFavs(); renderAll(); showNow(); }
+
+// ---------- views ----------
+function go(v){
+  if(selecting && v !== view) setSelecting(false);
+  view = v;
+  const shown = v === "admin" && !unlocked ? "lock" : v;
+  document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-" + shown);
+  document.querySelectorAll("#dock button").forEach(b => b.dataset.v === v ? b.setAttribute("aria-current","page") : b.removeAttribute("aria-current"));
+  if(v !== lastView){ const el = $("v-" + shown); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); lastView = v;
+    setTimeout(() => animateList({styles:"styleList", fav:"favList", admin:"admList"}[v]), 0); }
+  if(shown === "lock") setTimeout(() => $("pw").focus(), 50);
+  requestAnimationFrame(moveDockInd);
+  renderAll();
+}
+function moveDockInd(){ const b = document.querySelector("#dock button[aria-current]"), ind = $("dockInd"); if(!b) return; const nb = $("dock").getBoundingClientRect(), r = b.getBoundingClientRect(); ind.style.transform = `translateX(${r.left - nb.left + r.width/2 - 20}px)`; }
+addEventListener("resize", moveDockInd);
+$("dock").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if(b) go(b.dataset.v); });
+
+function renderAll(){
+  const n = catalog.tracks.length;
+  $("waveSub").textContent = n ? `${tracksWord(n)} · нажми, чтобы включить` : "Скоро здесь появится музыка";
+  if(view === "styles"){
+    const styles = allStyles(); if(styleSel !== "all" && styleSel !== "" && !styles.includes(styleSel)) styleSel = "all";
+    const cnt = s => catalog.tracks.filter(t => (t.style||"") === s).length;
+    const pr = v => `aria-pressed="${styleSel===v}"`;
+    $("styleChips").innerHTML = [`<button class="chip" data-s="all" ${pr("all")}>Все <small>${n}</small></button>`,
+      ...styles.map(s => `<button class="chip" data-s="${esc(s)}" ${pr(s)}>${esc(s)} <small>${cnt(s)}</small></button>`),
+      cnt("") ? `<button class="chip" data-s="" ${pr("")}>Без стиля <small>${cnt("")}</small></button>` : ""].join("");
+    $("allCount").textContent = n ? tracksWord(n) : "";
+    const list = catalog.tracks.filter(t => styleSel === "all" || (t.style||"") === styleSel);
+    renderList($("styleList"), list, n ? "В этом стиле пока нет треков." : "Музыка скоро появится.", rowUser);
+  }
+  if(view === "fav"){
+    const list = catalog.tracks.filter(t => favs.has(t.id));
+    $("favCount").textContent = list.length ? tracksWord(list.length) : "";
+    renderList($("favList"), list, "Нажми ♡ у трека, и он появится здесь. Избранное хранится на этом телефоне.", rowUser);
+  }
+  if(view === "admin" && unlocked){
+    $("tokenCard").hidden = !!token; $("adminBody").hidden = !token;
+    if(token){
+      const styles = allStyles();
+      $("upStyle").innerHTML = [`<button class="chip" data-u="" aria-pressed="${upStyleSel===""}">Без стиля</button>`,
+        ...styles.map(x => `<button class="chip" data-u="${esc(x)}" aria-pressed="${upStyleSel===x}">${esc(x)}</button>`),
+        `<button class="chip add" data-u-add="1">+ Свой стиль</button>`].join("");
+      const custom = upStyleSel && !BASE_STYLES.includes(upStyleSel);
+      $("styleManage").hidden = !custom;
+      if(custom) $("styleManage").innerHTML = `<span class="hint">Стиль «${esc(upStyleSel)}»</span><button class="chip" data-m="rename">Переименовать</button><button class="chip" data-m="del">Удалить стиль</button>`;
+      $("dropTitle").textContent = upStyleSel ? `Выбери аудиофайлы · «${upStyleSel}»` : "Выбери аудиофайлы";
+      $("admCount").textContent = n ? tracksWord(n) : "";
+      renderList($("admList"), catalog.tracks, "Пока нет ни одного трека. Загрузи первые файлы выше.", rowAdmin);
+      $("selBtn").textContent = selecting ? "Отменить выбор" : "Выбрать";
+    }
+  }
+  if(selecting){ $("selText").textContent = `Выбрано: ${picked.size}`; $("selDel").disabled = $("selStyle").disabled = !picked.size;
+    $("selAll").textContent = n && catalog.tracks.every(t => picked.has(t.id)) ? "Снять все" : "Выбрать все"; }
+}
+$("styleChips").addEventListener("click", e => { const c = e.target.closest("[data-s]"); if(c){ styleSel = c.dataset.s; renderAll(); animateList("styleList"); } });
+
+// ---------- admin: lock ----------
 async function sha(text){ const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)); return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join(""); }
 $("lockForm").onsubmit = async e => {
   e.preventDefault();
   let h = ""; try{ h = await sha("svoi:" + $("pw").value); }catch{ $("pwErr").textContent = "Этот браузер не может проверить пароль"; return; }
-  if(h === PW_HASH){ unlocked = true; try{ sessionStorage.setItem("svoi-open", PW_HASH); }catch{} $("pw").value = ""; $("pwErr").textContent = ""; go("upload"); toast("Загрузка открыта"); }
-  else { $("pwErr").textContent = "Неверный пароль"; $("lockForm").classList.remove("shake"); void $("lockForm").offsetWidth; $("lockForm").classList.add("shake"); $("pw").select(); }
+  if(h === PW_HASH){ unlocked = true; try{ sessionStorage.setItem("svoi-open", PW_HASH); }catch{} $("pw").value = ""; $("pwErr").textContent = ""; $("pw").blur(); go("admin"); }
+  else { $("pwErr").textContent = "Неверный пароль"; const f = $("lockForm"); f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); $("pw").select(); }
 };
-$("relock").onclick = () => { unlocked = false; try{ sessionStorage.removeItem("svoi-open"); }catch{} if(selecting) setSelecting(false); go("upload"); toast("Загрузка закрыта"); };
-document.querySelector(".lockicon").innerHTML = I.lock;
+$("relock").onclick = () => { unlocked = false; try{ sessionStorage.removeItem("svoi-open"); }catch{} setSelecting(false); go("admin"); };
 
-// ---------- edit sheet ----------
+// ---------- admin: GitHub token ----------
+$("tokenForm").onsubmit = async e => {
+  e.preventDefault();
+  const v = $("tokenInput").value.trim(); if(!v){ $("tokenInput").focus(); return; }
+  $("tokenErr").textContent = "Проверяю…"; const old = token; token = v;
+  try{ const r = await gh(""); if(!r.permissions || !r.permissions.push) throw Object.assign(new Error("no push"), {status:403});
+    store.set("svoi-gh-token", token); $("tokenInput").value = ""; $("tokenErr").textContent = ""; toast("GitHub подключён"); renderAll(); }
+  catch(err){ token = old; $("tokenErr").textContent = ghError(err); }
+};
+$("forgetToken").onclick = () => { token = ""; store.set("svoi-gh-token", ""); try{ localStorage.removeItem("svoi-gh-token"); }catch{} toast("Ключ удалён с этого телефона"); renderAll(); };
+
+// ---------- admin: styles ----------
+$("upStyle").addEventListener("click", e => {
+  if(e.target.closest("[data-u-add]")){ askName("Свой стиль", "", "Например, «Для зала»", name => {
+    if(allStyles().includes(name)){ upStyleSel = name; store.set("svoi-upstyle", name); renderAll(); return; }
+    run("Сохраняю стиль", () => commit(`Новый стиль: ${name}`, cat => { if(!cat.styles.includes(name)) cat.styles.push(name); })).then(ok => { if(ok){ upStyleSel = name; store.set("svoi-upstyle", name); renderAll(); } });
+  }); return; }
+  const c = e.target.closest("[data-u]"); if(c){ upStyleSel = c.dataset.u; store.set("svoi-upstyle", upStyleSel); renderAll(); }
+});
+$("styleManage").addEventListener("click", e => {
+  const a = e.target.closest("[data-m]")?.dataset.m; if(!a) return; const key = upStyleSel;
+  if(a === "rename") askName("Переименовать стиль", key, "Название стиля", name => {
+    if(name !== key && allStyles().includes(name)){ toast("Такой стиль уже есть"); return; }
+    run("Переименовываю", () => commit(`Стиль ${key} → ${name}`, cat => { cat.styles = cat.styles.map(x => x === key ? name : x); cat.tracks.forEach(t => { if(t.style === key) t.style = name; }); }))
+      .then(ok => { if(ok){ upStyleSel = name; store.set("svoi-upstyle", name); renderAll(); } });
+  });
+  if(a === "del"){
+    const cnt = catalog.tracks.filter(t => t.style === key).length;
+    $("styleManage").innerHTML = `<span class="hint">${cnt ? `${tracksWord(cnt)} останутся без стиля.` : "В стиле нет треков."}</span><button class="btn danger" data-m="yes">Удалить стиль</button><button class="btn ghost" data-m="no">Отмена</button>`;
+  }
+  if(a === "no") renderAll();
+  if(a === "yes") run("Удаляю стиль", () => commit(`Удалён стиль ${key}`, cat => { cat.styles = cat.styles.filter(x => x !== key); cat.tracks.forEach(t => { if(t.style === key) t.style = ""; }); }))
+    .then(ok => { if(ok){ upStyleSel = ""; store.set("svoi-upstyle", ""); renderAll(); } });
+});
+
+// ---------- admin: upload ----------
+const drop = $("drop");
+drop.onclick = () => $("upFile").click();
+drop.onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); $("upFile").click(); } };
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("on"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("on"); }));
+drop.addEventListener("drop", e => upload(e.dataTransfer.files));
+$("upFile").onchange = () => { upload($("upFile").files); $("upFile").value = ""; };
+const MAX = 95 * 1024 * 1024, CHUNK = 6;
+async function upload(fileList){
+  let files = [...fileList].filter(f => f.type.startsWith("audio/") || /\.(mp3|m4a|wav|flac|ogg|aac|opus)$/i.test(f.name));
+  const big = files.filter(f => f.size > MAX); files = files.filter(f => f.size <= MAX);
+  if(big.length) toast(`Пропущено ${big.length}: файл больше 95 МБ`);
+  if(!files.length){ if(!big.length) toast("Это не аудиофайлы"); return; }
+  if(busy){ toast("Дождись окончания предыдущего действия"); return; }
+  busy = true; $("prog").hidden = false; let done = 0, failed = 0;
+  const style = upStyleSel;
+  const show = () => { $("progText").textContent = `Загружаю ${Math.min(done+1, files.length)} из ${files.length}…`; $("progFill").style.width = (done / files.length * 100) + "%"; };
+  setStatus('<span class="dot warn"></span>Загружаю…');
+  for(let i = 0; i < files.length; i += CHUNK){
+    const part = files.slice(i, i + CHUNK).map(f => {
+      const id = uid(), ext = (f.name.match(/\.([a-z0-9]+)$/i)?.[1] || "mp3").toLowerCase();
+      const base = f.name.replace(/\.[^.]+$/,"").replace(/_/g," ").trim();
+      const m = base.match(/^(.+?)\s+[—–-]\s+(.+)$/);
+      return { blob:f, path:`music/${id}.${ext}`, track:{ id, title: m ? m[2].trim() : base, artist: m ? m[1].trim() : "", style, file:`music/${id}.${ext}`, size:f.size, added:new Date().toISOString().slice(0,10) } };
+    });
+    show();
+    try{
+      await commit(`Загружено: ${part.length}`, cat => { part.forEach(p => cat.tracks.push(p.track)); }, part, k => { done = i + k; show(); });
+      part.forEach(p => pending.set(p.track.id, p.blob));
+    }catch(e){ console.error(e); failed += part.length; done = i + part.length; toast(ghError(e)); }
+  }
+  $("progFill").style.width = "100%";
+  const ok = files.length - failed;
+  $("progText").textContent = `Готово: ${tracksWord(ok)} загружено` + (failed ? `, ${failed} не загрузились` : "") + (style ? ` · стиль «${style}»` : "");
+  busy = false; renderAll();
+}
+
+// ---------- admin: list actions ----------
+$("admList").addEventListener("click", e => {
+  const row = e.target.closest(".row"); if(!row) return;
+  const t = catalog.tracks.find(x => x.id === row.dataset.id); if(!t) return;
+  if(selecting){ picked.has(t.id) ? picked.delete(t.id) : picked.add(t.id); $("selAsk").hidden = true; $("selActs").hidden = false; renderAll(); return; }
+  const a = e.target.closest("[data-a]")?.dataset.a;
+  if(a === "edit"){ openEdit(t); return; }
+  if(a === "del"){ askDel = t.id; renderAll(); return; }
+  if(a === "delno"){ askDel = null; renderAll(); return; }
+  if(a === "delyes"){ askDel = null; removeTracks([t.id]); return; }
+  if(askDel || e.target.closest(".grip")) return;
+  playFrom(catalog.tracks, t);
+});
+function removeTracks(ids){
+  const set = new Set(ids);
+  if(cur && set.has(cur.id)){ audio.pause(); cur = null; resetMini(); }
+  return run("Удаляю", () => commit(`Удалено: ${ids.length}`, cat => {
+    const gone = cat.tracks.filter(t => set.has(t.id)).map(t => t.file);
+    cat.tracks = cat.tracks.filter(t => !set.has(t.id)); return gone;
+  })).then(ok => { if(ok){ ids.forEach(id => { favs.delete(id); pending.delete(id); }); saveFavs(); toast(`Удалено: ${tracksWord(ids.length)}`); } return ok; });
+}
+function setStyleFor(ids, st){
+  const set = new Set(ids);
+  return run("Меняю стиль", () => commit(`Стиль «${st || "без стиля"}»: ${ids.length}`, cat => {
+    if(st && !cat.styles.includes(st) && !BASE_STYLES.includes(st)) cat.styles.push(st);
+    cat.tracks.forEach(t => { if(set.has(t.id)) t.style = st; });
+  }));
+}
+let orderTimer = null;
+if(window.Sortable) Sortable.create($("admList"), { handle:".grip", draggable:".row", animation:160, forceFallback:true, fallbackTolerance:4,
+  onEnd: e => {
+    if(e.oldIndex === e.newIndex) return;
+    const ids = [...$("admList").querySelectorAll(".row[data-id]")].map(r => r.dataset.id);
+    const byId = new Map(catalog.tracks.map(t => [t.id, t])); catalog.tracks = ids.map(id => byId.get(id)).filter(Boolean);
+    clearTimeout(orderTimer);
+    orderTimer = setTimeout(() => run("Сохраняю порядок", () => commit("Новый порядок треков", cat => {
+      const pos = new Map(ids.map((id, i) => [id, i]));
+      cat.tracks.sort((a, b) => (pos.has(a.id) ? pos.get(a.id) : 1e9) - (pos.has(b.id) ? pos.get(b.id) : 1e9));
+    })), 1200);
+  } });
+
 function openEdit(t){
-  const s = document.createElement("div"); s.className = "scrim";
-  s.innerHTML = `<form class="sheet">
+  const s = sheet(`<form id="eForm" style="display:flex;flex-direction:column;gap:12px">
     <h2>Трек</h2>
     <label for="e-title">Название</label><input type="text" id="e-title" value="${esc(t.title)}">
     <label for="e-artist">Исполнитель</label><input type="text" id="e-artist" value="${esc(t.artist)}">
-    <div><div><label for="e-style">Стиль</label><select id="e-style"><option value="">Без стиля</option>${allStyles().map(x=>`<option ${t.style===x?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>
-    <div class="toolbar"><button class="btn ghost" type="button" data-x="del">${hasSound(t)?"Удалить трек":"Удалить из списка"}</button>
-      <div class="chips"><button class="btn ghost" type="button" data-x="close">Отмена</button><button class="btn" type="submit">Сохранить</button></div></div>
-    <div class="toolbar" data-confirm hidden><span class="hint">Удалить «${esc(t.title)}» насовсем?</span><button class="btn" type="button" data-x="yes">Да, удалить</button></div>
-  </form>`;
-  document.body.append(s);
-  const close = () => s.remove();
-  s.addEventListener("click", e => {
-    if(e.target === s) close();
-    const x = e.target.closest("[data-x]")?.dataset.x;
-    if(x==="close") close();
-    if(x==="del") s.querySelector("[data-confirm]").hidden = false;
-    if(x==="yes"){ tracks = tracks.filter(z=>z.id!==t.id); favs.delete(t.id); blobs.delete(t.id); delBlob(t.id); save(); close(); renderAll(); toast("Удалено"); }
-  });
-  s.querySelector("form").onsubmit = e => {
+    <label for="e-style">Стиль</label><select id="e-style"><option value="">Без стиля</option>${allStyles().map(x => `<option ${t.style===x?"selected":""}>${esc(x)}</option>`).join("")}</select>
+    <div class="toolbar"><button class="btn ghost" type="button" id="eCancel">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>`);
+  s.querySelector("#eCancel").onclick = () => s.remove();
+  s.querySelector("#eForm").onsubmit = e => {
     e.preventDefault();
-    t.title = s.querySelector("#e-title").value.trim() || t.title;
-    t.artist = s.querySelector("#e-artist").value.trim();
-    t.style = s.querySelector("#e-style").value;
-    save(); close(); renderAll(); if(cur && cur.id===t.id) showNow(); toast("Сохранено");
+    const title = s.querySelector("#e-title").value.trim() || t.title, artist = s.querySelector("#e-artist").value.trim(), style = s.querySelector("#e-style").value;
+    s.remove();
+    run("Сохраняю", () => commit(`Изменён трек: ${title}`, cat => { const x = cat.tracks.find(z => z.id === t.id); if(x){ x.title = title; x.artist = artist; x.style = style; } })).then(ok => { if(ok){ toast("Сохранено"); showNow(); } });
   };
-  s.querySelector("#e-title").focus();
 }
+
+// ---------- admin: selection ----------
+function setSelecting(on){
+  selecting = on; picked.clear(); askDel = null;
+  $("selBar").hidden = !on; $("selAsk").hidden = true; $("selActs").hidden = false;
+  renderAll(); measure();
+}
+$("selBtn").onclick = () => setSelecting(!selecting);
+$("selDone").onclick = () => setSelecting(false);
+$("selAll").onclick = () => { const all = catalog.tracks.every(t => picked.has(t.id)); catalog.tracks.forEach(t => all ? picked.delete(t.id) : picked.add(t.id)); renderAll(); };
+$("selDel").onclick = () => { if(!picked.size) return; $("selActs").hidden = true; $("selAsk").hidden = false; $("selYes").textContent = `Да, удалить ${picked.size}`; measure(); };
+$("selNo").onclick = () => { $("selAsk").hidden = true; $("selActs").hidden = false; measure(); };
+$("selYes").onclick = async () => { const ids = [...picked]; if(await removeTracks(ids)) setSelecting(false); };
+$("selStyle").onclick = () => {
+  if(!picked.size) return; const ids = [...picked];
+  const s = sheet(`<h2>Стиль для ${tracksWord(ids.length)}</h2>
+    <div class="flist">${allStyles().map(x => `<button class="fopt" data-st="${esc(x)}">${esc(x)}</button>`).join("")}<button class="fopt" data-st="">Без стиля</button></div>
+    <form class="inline" id="stNew"><input type="text" id="stName" maxlength="40" placeholder="Или новый стиль"><button class="btn" type="submit">Создать</button></form>
+    <button class="btn ghost" type="button" id="stCancel">Отмена</button>`);
+  const apply = st => { s.remove(); setStyleFor(ids, st).then(ok => { if(ok){ toast(`«${st || "Без стиля"}»: ${tracksWord(ids.length)}`); setSelecting(false); } }); };
+  s.querySelector("#stCancel").onclick = () => s.remove();
+  s.querySelector(".flist").onclick = e => { const b = e.target.closest("[data-st]"); if(b) apply(b.dataset.st); };
+  s.querySelector("#stNew").onsubmit = e => { e.preventDefault(); const v = s.querySelector("#stName").value.trim(); if(v) apply(v); };
+};
 
 // ---------- player ----------
 const audio = $("audio");
-let queue = [], qi = -1, cur = null, url = null, actx = null, analyser = null, freq = null;
-function ensureAudioGraph(){
+let queue = [], qi = -1, cur = null, objUrl = null, actx = null, analyser = null, freq = null;
+function srcOf(t){ if(pending.has(t.id)){ if(objUrl) URL.revokeObjectURL(objUrl); objUrl = URL.createObjectURL(pending.get(t.id)); return objUrl; } return t.file; }
+function ensureGraph(){
   if(actx) return;
-  try{ actx = new (window.AudioContext||window.webkitAudioContext)(); const src = actx.createMediaElementSource(audio);
-    analyser = actx.createAnalyser(); analyser.fftSize = 256; freq = new Uint8Array(analyser.frequencyBinCount);
-    src.connect(analyser); analyser.connect(actx.destination); }catch{ actx = null; }
+  try{ actx = new (window.AudioContext || window.webkitAudioContext)(); const src = actx.createMediaElementSource(audio); analyser = actx.createAnalyser(); analyser.fftSize = 256; freq = new Uint8Array(analyser.frequencyBinCount); src.connect(analyser); analyser.connect(actx.destination); }catch{ actx = null; }
 }
-function playFrom(list, t){
-  if(!hasSound(t)){ attachFor = t; toast("У трека нет звука — выбери файл"); $("upFile").multiple = false; $("upFile").click(); return; }
-  queue = list.filter(hasSound); qi = queue.findIndex(x=>x.id===t.id); start();
-}
+function playFrom(list, t){ queue = list.slice(); qi = queue.findIndex(x => x.id === t.id); start(); }
 function start(){
   cur = queue[qi]; if(!cur) return;
-  if(url) URL.revokeObjectURL(url);
-  url = URL.createObjectURL(blobs.get(cur.id)); audio.src = url;
-  ensureAudioGraph(); actx?.resume?.();
-  audio.play().catch(()=>toast("Не удалось воспроизвести файл"));
+  audio.src = srcOf(cur); ensureGraph(); actx?.resume?.();
+  audio.play().catch(() => toast("Не удалось включить трек"));
   showNow(); renderAll();
+  if("mediaSession" in navigator){ try{ navigator.mediaSession.metadata = new MediaMetadata({ title: cur.title, artist: cur.artist || "СВОИ", album: cur.style || "СВОИ", artwork:[{src:"icon-512.png", sizes:"512x512", type:"image/png"}] }); }catch{} }
 }
+function resetMini(){ $("miniT").textContent = "Ничего не играет"; $("miniA").textContent = "Включи волну или выбери трек"; $("miniCover").style.background = "var(--line)"; $("miniCover").textContent = ""; }
 function showNow(){
-  if(!cur) return;
+  if(!cur){ $("likeNow").innerHTML = I.heart; return; }
   $("miniT").textContent = cur.title; $("miniA").textContent = cur.artist || "Неизвестный исполнитель";
-  const c = $("miniCover"); c.style.background = colorOf(cur.artist||cur.title); c.textContent = (cur.artist||cur.title||"?").trim()[0]?.toUpperCase()||"";
+  const c = $("miniCover"); c.style.background = colorOf(cur.artist||cur.title); c.textContent = (cur.artist||cur.title||"?").trim()[0]?.toUpperCase() || "";
   $("likeNow").innerHTML = favs.has(cur.id) ? I.heartF : I.heart; $("likeNow").classList.toggle("on", favs.has(cur.id));
 }
-function wave(){
-  const pool = tracks.filter(hasSound);
-  if(!pool.length){ go("upload"); toast("Сначала загрузи музыку"); return; }
-  queue = pool.slice().sort(()=>Math.random()-.5); qi = 0; start();
-}
-$("wavePlay").onclick = () => { if(cur && !audio.paused){ audio.pause(); return; } if(cur && audio.src){ audio.play(); return; } wave(); };
+function wave(){ if(!catalog.tracks.length){ toast("Музыка скоро появится"); return; } queue = catalog.tracks.slice().sort(() => Math.random() - .5); qi = 0; start(); }
+$("wavePlay").onclick = () => { if(cur && !audio.paused){ audio.pause(); return; } if(cur){ audio.play(); return; } wave(); };
 $("pp").onclick = () => { if(!cur){ wave(); return; } audio.paused ? audio.play() : audio.pause(); };
-$("next").onclick = () => { if(!queue.length) return; qi = (qi+1) % queue.length; start(); };
-$("prev").onclick = () => { if(!queue.length) return; if(audio.currentTime > 3){ audio.currentTime = 0; return; } qi = (qi-1+queue.length) % queue.length; start(); };
-$("likeNow").onclick = () => { if(!cur) return; favs.has(cur.id) ? favs.delete(cur.id) : favs.add(cur.id); save(); showNow(); renderAll(); };
-audio.onended = () => $("next").click();
-const fmt = s => isFinite(s) ? Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0") : "0:00";
-audio.ontimeupdate = () => { $("barFill").style.width = (audio.duration ? audio.currentTime/audio.duration*100 : 0) + "%"; $("time").textContent = fmt(audio.currentTime)+" / "+fmt(audio.duration); };
-const syncPP = () => { const p = !audio.paused; $("pp").innerHTML = p ? I.pause : I.play; $("wavePlay").innerHTML = p ? I.pause : I.play; $("pp").setAttribute("aria-label", p?"Пауза":"Играть"); };
-audio.onplay = () => { syncPP(); document.querySelector(".app").classList.add("playing-now"); kickLoop(); };
-audio.onpause = () => { syncPP(); document.querySelector(".app").classList.remove("playing-now"); };
-$("bar").onclick = e => { if(!audio.duration) return; const r = e.currentTarget.getBoundingClientRect(); audio.currentTime = (e.clientX - r.left)/r.width * audio.duration; };
-document.addEventListener("keydown", e => { if(e.code==="Space" && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(document.activeElement.tagName)){ e.preventDefault(); $("pp").click(); } });
+const nextT = () => { if(!queue.length) return; qi = (qi + 1) % queue.length; start(); };
+const prevT = () => { if(!queue.length) return; if(audio.currentTime > 3){ audio.currentTime = 0; return; } qi = (qi - 1 + queue.length) % queue.length; start(); };
+$("next").onclick = nextT; $("prev").onclick = prevT;
+$("likeNow").onclick = () => { if(cur) toggleFav(cur.id); };
+audio.onended = nextT;
+audio.onerror = () => { if(cur){ toast("Трек ещё публикуется или недоступен"); } };
+if("mediaSession" in navigator){ try{ navigator.mediaSession.setActionHandler("nexttrack", nextT); navigator.mediaSession.setActionHandler("previoustrack", prevT); navigator.mediaSession.setActionHandler("play", () => audio.play()); navigator.mediaSession.setActionHandler("pause", () => audio.pause()); }catch{} }
+const fmt = s => isFinite(s) ? Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0") : "0:00";
+audio.ontimeupdate = () => { $("barFill").style.width = (audio.duration ? audio.currentTime / audio.duration * 100 : 0) + "%"; $("time").textContent = fmt(audio.currentTime) + " / " + fmt(audio.duration); };
+const syncPP = () => { const p = !audio.paused; $("pp").innerHTML = p ? I.pause : I.play; $("wavePlay").innerHTML = p ? I.pause : I.play; $("pp").setAttribute("aria-label", p ? "Пауза" : "Играть"); $("app").classList.toggle("playing-now", p); };
+audio.onplay = () => { syncPP(); kickLoop(); }; audio.onpause = syncPP;
+$("bar").onclick = e => { if(!audio.duration) return; const r = e.currentTarget.getBoundingClientRect(); audio.currentTime = (e.clientX - r.left) / r.width * audio.duration; };
 
-// ---------- wave canvas ----------
+// ---------- wave ----------
 const cv = $("wave"), cx = cv.getContext("2d");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const RES = .55; // drawn at reduced resolution, softened by CSS blur
+const RES = .55;
 const layers = [
-  {r:.60, c:[[34,31,62,.96],[28,25,50,0]], depth:.015, sp:.45, seed:1.13, amp:.10},
-  {r:.50, c:[[88,44,104,.92],[66,34,88,0]], depth:.03,  sp:.60, seed:2.71, amp:.11},
-  {r:.41, c:[[186,80,112,.88],[140,58,100,0]], depth:.05, sp:.78, seed:3.97, amp:.12},
-  {r:.31, c:[[246,196,92,1],[226,140,74,0]], depth:.075, sp:.95, seed:5.41, amp:.13},
+  {r:.62, c:[[34,31,62,.96],[28,25,50,0]], depth:.015, sp:.45, seed:1.13, amp:.10},
+  {r:.52, c:[[88,44,104,.92],[66,34,88,0]], depth:.03, sp:.60, seed:2.71, amp:.11},
+  {r:.42, c:[[190,82,114,.88],[140,58,100,0]], depth:.05, sp:.78, seed:3.97, amp:.12},
+  {r:.32, c:[[246,196,92,1],[226,140,74,0]], depth:.075, sp:.95, seed:5.41, amp:.13},
   {r:.17, c:[[255,236,190,.85],[255,214,140,0]], depth:.10, sp:1.2, seed:7.77, amp:.16, screen:true}
 ];
-const rgba = (c,a) => `rgba(${c[0]},${c[1]},${c[2]},${a ?? c[3]})`;
-function size(){ cv.width = Math.max(1, cv.clientWidth*RES); cv.height = Math.max(1, cv.clientHeight*RES); cx.setTransform(RES,0,0,RES,0,0); }
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a ?? c[3]})`;
+function size(){ cv.width = Math.max(1, cv.clientWidth * RES); cv.height = Math.max(1, cv.clientHeight * RES); cx.setTransform(RES,0,0,RES,0,0); }
 addEventListener("resize", size); size();
 const P = {x:0, y:0, tx:0, ty:0};
-addEventListener("pointermove", e => { P.tx = e.clientX/innerWidth - .5; P.ty = e.clientY/innerHeight - .5; }, {passive:true});
-let E = 0, kick = 0, prevBass = 0, running = false, rot = 0, lastTs = 0;
+addEventListener("pointermove", e => { P.tx = e.clientX / innerWidth - .5; P.ty = e.clientY / innerHeight - .5; }, {passive:true});
+let E = 0, kick = 0, prevBass = 0, rot = 0, lastTs = 0, running = false;
 function draw(ts){
   const w = cv.clientWidth, h = cv.clientHeight; if(!w) return;
-  const t = reduce ? 0 : ts/1000, dt = Math.min(.05, (ts - lastTs)/1000 || .016); lastTs = ts;
+  const t = reduce ? 0 : ts / 1000, dt = Math.min(.05, (ts - lastTs) / 1000 || .016); lastTs = ts;
   let raw = 0, bass = 0;
   if(analyser && !audio.paused){ analyser.getByteFrequencyData(freq); for(let i=0;i<8;i++) bass += freq[i]; for(let i=0;i<40;i++) raw += freq[i]; bass /= 8*255; raw /= 40*255; }
-  E += (raw - E) * .09;
-  if(bass - prevBass > .07) kick = Math.min(1, kick + (bass - prevBass) * 3.2);
-  prevBass = bass; kick *= .9;
+  E += (raw - E) * .09; if(bass - prevBass > .07) kick = Math.min(1, kick + (bass - prevBass) * 3.2); prevBass = bass; kick *= .9;
   document.documentElement.style.setProperty("--e", (E*.8 + kick*.35).toFixed(3));
-  P.x += (P.tx - P.x) * .05; P.y += (P.ty - P.y) * .05;
-  rot += dt * (.04 + E*.25);
+  P.x += (P.tx - P.x) * .05; P.y += (P.ty - P.y) * .05; rot += dt * (.04 + E*.25);
   cx.clearRect(0,0,w,h);
-  const base = Math.min(w, h*1.3), breath = 1 + Math.sin(t*.55)*.018;
+  const base = Math.min(w*1.15, h*.95), breath = 1 + Math.sin(t*.55)*.018;
   layers.forEach((L, li) => {
-    const mx = w/2 + P.x*w*L.depth*2, my = h/2 + P.y*h*L.depth*2;
+    const mx = w/2 + P.x*w*L.depth*2, my = h*.47 + P.y*h*L.depth*2;
     const R = base * L.r * breath * (1 + E*.22*(li+1)/3 + kick*.06*(li+1)/2);
     const g = cx.createRadialGradient(mx, my - R*.08, R*.05, mx, my, R*1.15);
     g.addColorStop(0, rgba(L.c[0])); g.addColorStop(.62, rgba(L.c[0], L.c[0][3]*.92)); g.addColorStop(1, rgba(L.c[1]));
-    cx.globalCompositeOperation = L.screen ? "screen" : "source-over";
-    cx.fillStyle = g; cx.beginPath();
-    const N = 120, sp = L.sp, sd = L.seed;
-    for(let i=0;i<=N;i++){
-      const a = i/N*Math.PI*2 + rot*(li%2 ? -1 : 1)*.6;
-      const n = Math.sin(a*2 + t*.31*sp + sd)*L.amp*.9
-              + Math.sin(a*3 - t*.23*sp + sd*1.7)*L.amp*.6
-              + Math.cos(a*5 + t*.17*sp + sd*.5)*L.amp*.28
-              + Math.sin(a*7 - t*.9*sp)*E*.07;
-      const rr = R*(1 + n);
-      const x = mx + Math.cos(a)*rr*1.14, y = my + Math.sin(a)*rr*.94;
+    cx.globalCompositeOperation = L.screen ? "screen" : "source-over"; cx.fillStyle = g; cx.beginPath();
+    for(let i=0;i<=120;i++){
+      const a = i/120*Math.PI*2 + rot*(li%2 ? -1 : 1)*.6;
+      const n = Math.sin(a*2 + t*.31*L.sp + L.seed)*L.amp*.9 + Math.sin(a*3 - t*.23*L.sp + L.seed*1.7)*L.amp*.6 + Math.cos(a*5 + t*.17*L.sp + L.seed*.5)*L.amp*.28 + Math.sin(a*7 - t*.9*L.sp)*E*.07;
+      const rr = R*(1 + n), x = mx + Math.cos(a)*rr*.98, y = my + Math.sin(a)*rr*1.12;
       i ? cx.lineTo(x,y) : cx.moveTo(x,y);
     }
     cx.closePath(); cx.fill();
@@ -806,22 +787,12 @@ function draw(ts){
 function loop(ts){ draw(ts); if(!reduce) requestAnimationFrame(loop); else running = false; }
 function kickLoop(){ if(reduce && !running){ running = true; requestAnimationFrame(loop); } }
 requestAnimationFrame(loop);
-addEventListener("resize", () => { if(reduce) requestAnimationFrame(draw); });
 
 // ---------- boot ----------
-load();
-let startTab = "home"; try{ startTab = localStorage.getItem(LS+"-tab") || "home"; }catch{}
-(async () => {
-  db = await openDB(); dbTried = true;
-  for(const t of tracks){ const b = await getBlob(t.id); if(b) blobs.set(t.id, b); }
-  go(["home","styles","fav","upload"].includes(startTab) ? startTab : "home");
-})();
-go("home");
-})();
-</script>
-
-<script>
+const cached = store.get("svoi-cat", null); if(cached) catalog = normalize(cached);
+go("home"); measure(); loadCatalog();
 if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+})();
 </script>
 </body>
 </html>
