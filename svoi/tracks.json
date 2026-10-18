@@ -6,9 +6,9 @@
  "tracks": [
   {
    "id": "mvdlrl9kuzohx",
-   "title": "Human (musmore.com)",
+   "title": "Human",
    "artist": "Sevdaliza",
-   "style": "",
+   "style": "Электро",
    "file": "music/mvdlrl9kuzohx.mp3",
    "size": 7694418,
    "added": "2026-10-18"
@@ -599,5 +599,5 @@
    "added": "2026-10-18"
   }
  ],
- "rev": 1792314828429
+ "rev": 1792315433469
 }
